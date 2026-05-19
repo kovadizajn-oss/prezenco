@@ -1,18 +1,95 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createClient, getSupabaseEnv } from "@/lib/supabase/client";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const { url, anonKey, isConfigured } = getSupabaseEnv();
+    console.log("[login] Supabase env (on mount)", {
+      isConfigured,
+      NEXT_PUBLIC_SUPABASE_URL: url
+        ? `${url.slice(0, 24)}… (${url.length} chars)`
+        : undefined,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: anonKey
+        ? `${anonKey.slice(0, 12)}…${anonKey.slice(-4)} (${anonKey.length} chars)`
+        : undefined,
+    });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate sign in - replace with actual auth logic
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsLoading(false);
+    setError(null);
+
+    const { url, anonKey, isConfigured } = getSupabaseEnv();
+    console.log("[login] Supabase env (on submit)", {
+      isConfigured,
+      NEXT_PUBLIC_SUPABASE_URL: url ?? null,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: anonKey
+        ? `[redacted, ${anonKey.length} chars]`
+        : null,
+    });
+
+    if (!isConfigured) {
+      console.error(
+        "[login] Missing env: set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local, then restart `npm run dev`",
+      );
+      setError("Invalid email or password.");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const supabase = createClient();
+      const result = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      console.log("[login] signInWithPassword full response", result);
+      console.log("[login] signInWithPassword data", result.data);
+      console.log("[login] signInWithPassword error", result.error);
+
+      if (result.error) {
+        console.error("[login] signIn failed", {
+          message: result.error.message,
+          status: result.error.status,
+          code: result.error.code,
+          name: result.error.name,
+        });
+        setError("Invalid email or password.");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!result.data.session) {
+        console.warn(
+          "[login] No error but session is null — check email confirmation or Auth settings in Supabase",
+          result.data,
+        );
+        setError("Invalid email or password.");
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("[login] Sign-in OK, redirecting to /dashboard", {
+        userId: result.data.user?.id,
+        expiresAt: result.data.session.expires_at,
+      });
+
+      // Full navigation so middleware receives auth cookies on the next request
+      window.location.assign("/dashboard");
+    } catch (err) {
+      console.error("[login] Unexpected error during sign-in", err);
+      setError("Invalid email or password.");
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -62,6 +139,12 @@ export function LoginForm() {
       >
         {isLoading ? "Signing in..." : "Sign In"}
       </button>
+
+      {error ? (
+        <p className="text-sm text-red-600 text-center" role="alert">
+          {error}
+        </p>
+      ) : null}
 
       <div className="text-center">
         <a
