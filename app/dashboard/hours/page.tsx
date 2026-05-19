@@ -22,11 +22,13 @@ type ShiftRow = {
 
 type EditingShift = {
   checkin_id: string
-  checkout_id: string
-  checkin_time: string   // "HH:MM" local
-  checkout_time: string  // "HH:MM" local
-  date_iso: string       // "YYYY-MM-DD" local, for reconstructing full timestamp
+  checkout_id: string | null  // null = missing checkout, will INSERT instead of UPDATE
+  checkin_time: string
+  checkout_time: string
+  date_iso: string
   reason: string
+  employee_id: string
+  business_id: string
 }
 
 export default function HoursPage() {
@@ -39,6 +41,7 @@ export default function HoursPage() {
   const [shiftsLoading, setShiftsLoading] = useState(false)
   const [totalMinutes, setTotalMinutes] = useState(0)
   const [ownerName, setOwnerName] = useState('')
+  const [businessId, setBusinessId] = useState('')
 
   // Edit modal state
   const [editing, setEditing] = useState<EditingShift | null>(null)
@@ -66,6 +69,7 @@ export default function HoursPage() {
     if (!business) return
 
     setOwnerName(business.owner_name ?? '')
+    setBusinessId(business.id)
 
     const { data: emps } = await supabase
       .from('employees')
@@ -172,7 +176,6 @@ export default function HoursPage() {
     return h > 0 ? `${h}h ${m}m` : `${m}m`
   }
 
-  // Convert ISO timestamp to "HH:MM" in local time
   const toLocalTimeInput = (iso: string) => {
     const d = new Date(iso)
     const hh = String(d.getHours()).padStart(2, '0')
@@ -180,13 +183,11 @@ export default function HoursPage() {
     return `${hh}:${mm}`
   }
 
-  // Get "YYYY-MM-DD" in local time from ISO string
   const toLocalDateString = (iso: string) => {
     const d = new Date(iso)
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   }
 
-  // Combine a local date string "YYYY-MM-DD" and time "HH:MM" into a UTC ISO string
   const toISOFromLocalDateTime = (dateStr: string, timeStr: string) => {
     const [year, month, day] = dateStr.split('-').map(Number)
     const [hours, minutes] = timeStr.split(':').map(Number)
@@ -195,15 +196,28 @@ export default function HoursPage() {
   }
 
   const openEditModal = (shift: ShiftRow) => {
-    if (!shift.checkin_id || !shift.checkout_id || !shift.checkin || !shift.checkout) return
+    if (!shift.checkin_id || !shift.checkin) return
     setSaveError('')
+
+    // Default checkout: existing checkout time, or checkin + 8h capped at 23:59
+    const defaultCheckout = shift.checkout
+      ? toLocalTimeInput(shift.checkout)
+      : (() => {
+          const d = new Date(shift.checkin)
+          d.setHours(d.getHours() + 8)
+          if (d.getDate() !== new Date(shift.checkin).getDate()) d.setHours(23, 59)
+          return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+        })()
+
     setEditing({
       checkin_id: shift.checkin_id,
       checkout_id: shift.checkout_id,
       checkin_time: toLocalTimeInput(shift.checkin),
-      checkout_time: toLocalTimeInput(shift.checkout),
+      checkout_time: defaultCheckout,
       date_iso: toLocalDateString(shift.checkin),
       reason: '',
+      employee_id: selectedEmp,
+      business_id: businessId,
     })
   }
 
@@ -225,16 +239,13 @@ export default function HoursPage() {
     setSaving(true)
     setSaveError('')
 
-    // Fetch original timestamps before overwriting
-    const { data: origLogs } = await supabase
+    // Always update the check-in row
+    const { data: origCheckinData } = await supabase
       .from('time_logs')
-      .select('id, timestamp')
-      .in('id', [editing.checkin_id, editing.checkout_id])
+      .select('timestamp')
+      .eq('id', editing.checkin_id)
+      .single()
 
-    const origCheckin = origLogs?.find(l => l.id === editing.checkin_id)?.timestamp ?? null
-    const origCheckout = origLogs?.find(l => l.id === editing.checkout_id)?.timestamp ?? null
-
-    // Update check-in row
     const { error: err1 } = await supabase
       .from('time_logs')
       .update({
@@ -242,7 +253,7 @@ export default function HoursPage() {
         manually_adjusted: true,
         adjusted_by: ownerName,
         adjustment_reason: editing.reason.trim(),
-        original_timestamp: origCheckin,
+        original_timestamp: origCheckinData?.timestamp ?? null,
       })
       .eq('id', editing.checkin_id)
 
@@ -252,22 +263,52 @@ export default function HoursPage() {
       return
     }
 
-    // Update check-out row
-    const { error: err2 } = await supabase
-      .from('time_logs')
-      .update({
-        timestamp: newCheckoutISO,
-        manually_adjusted: true,
-        adjusted_by: ownerName,
-        adjustment_reason: editing.reason.trim(),
-        original_timestamp: origCheckout,
-      })
-      .eq('id', editing.checkout_id)
+    if (editing.checkout_id) {
+      // UPDATE existing checkout row
+      const { data: origCheckoutData } = await supabase
+        .from('time_logs')
+        .select('timestamp')
+        .eq('id', editing.checkout_id)
+        .single()
 
-    if (err2) {
-      setSaveError('Failed to save check-out. Please try again.')
-      setSaving(false)
-      return
+      const { error: err2 } = await supabase
+        .from('time_logs')
+        .update({
+          timestamp: newCheckoutISO,
+          manually_adjusted: true,
+          adjusted_by: ownerName,
+          adjustment_reason: editing.reason.trim(),
+          original_timestamp: origCheckoutData?.timestamp ?? null,
+        })
+        .eq('id', editing.checkout_id)
+
+      if (err2) {
+        setSaveError('Failed to save check-out. Please try again.')
+        setSaving(false)
+        return
+      }
+    } else {
+      // INSERT missing checkout row
+      const { error: err2 } = await supabase
+        .from('time_logs')
+        .insert({
+          employee_id: editing.employee_id,
+          business_id: editing.business_id,
+          type: 'checkout',
+          timestamp: newCheckoutISO,
+          lat: 0,
+          lng: 0,
+          within_radius: true,
+          manually_adjusted: true,
+          adjusted_by: ownerName,
+          adjustment_reason: editing.reason.trim(),
+        })
+
+      if (err2) {
+        setSaveError('Failed to add check-out. Please try again.')
+        setSaving(false)
+        return
+      }
     }
 
     setSaving(false)
@@ -359,12 +400,16 @@ export default function HoursPage() {
                     )}
                   </span>
                   <span className="text-right">
-                    {shift.checkin_id && shift.checkout_id && (
+                    {shift.checkin_id && (
                       <button
                         onClick={() => openEditModal(shift)}
-                        className="text-xs text-gray-400 hover:text-gray-700 border border-gray-200 hover:border-gray-300 rounded-lg px-2.5 py-1 transition-colors"
+                        className={`text-xs border rounded-lg px-2.5 py-1 transition-colors ${
+                          !shift.checkout_id
+                            ? 'text-amber-600 border-amber-200 hover:border-amber-400 hover:text-amber-800'
+                            : 'text-gray-400 hover:text-gray-700 border-gray-200 hover:border-gray-300'
+                        }`}
                       >
-                        Edit
+                        {!shift.checkout_id ? 'Add checkout' : 'Edit'}
                       </button>
                     )}
                   </span>
@@ -375,27 +420,25 @@ export default function HoursPage() {
         </>
       )}
 
-      {/* Edit Modal */}
+      {/* Edit / Add checkout Modal */}
       {editing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40"
             onClick={() => { if (!saving) setEditing(null) }}
           />
-
-          {/* Modal card */}
           <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 z-10">
-            <h2 className="text-base font-semibold text-gray-900 mb-1">Adjust shift times</h2>
+            <h2 className="text-base font-semibold text-gray-900 mb-1">
+              {editing.checkout_id ? 'Adjust shift times' : 'Add missing checkout'}
+            </h2>
             <p className="text-xs text-gray-400 mb-5">
-              Original times will be saved for reference.
+              {editing.checkout_id
+                ? 'Original times will be saved for reference.'
+                : 'Set the checkout time for this shift.'}
             </p>
 
-            {/* Check-in time */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Check-in time
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Check-in time</label>
               <input
                 type="time"
                 value={editing.checkin_time}
@@ -404,11 +447,8 @@ export default function HoursPage() {
               />
             </div>
 
-            {/* Check-out time */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Check-out time
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Check-out time</label>
               <input
                 type="time"
                 value={editing.checkout_time}
@@ -417,7 +457,6 @@ export default function HoursPage() {
               />
             </div>
 
-            {/* Reason */}
             <div className="mb-5">
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Reason <span className="text-red-400">*</span>
