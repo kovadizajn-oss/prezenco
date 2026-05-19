@@ -140,8 +140,9 @@ export default function HoursPage() {
     const checkins = logs.filter(l => l.type === 'checkin')
     const checkouts = logs.filter(l => l.type === 'checkout')
 
-    checkins.forEach((ci, i) => {
-      const co = checkouts[i] ?? null
+    checkins.forEach((ci) => {
+      // Find the first checkout that comes after this checkin
+      const co = checkouts.find(co => co.timestamp > ci.timestamp) ?? null
       const date = new Date(ci.timestamp).toLocaleDateString('en-GB', {
         weekday: 'short', day: 'numeric', month: 'short'
       })
