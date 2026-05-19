@@ -75,8 +75,8 @@ export default function DashboardPage() {
 
     const enriched: EmployeeWithLogs[] = emps.map((emp) => {
       const empLogs = (logs || []).filter(l => l.employee_id === emp.id)
-      const checkin = empLogs.find(l => l.type === 'check-in')
-      const checkout = empLogs.filter(l => l.type === 'check-out').pop()
+      const checkin = empLogs.find(l => l.type === 'checkin')
+const checkout = empLogs.filter(l => l.type === 'checkout').pop()
 
       let totalMinutes: number | null = null
       if (checkin && checkout) {
