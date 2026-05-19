@@ -61,8 +61,8 @@ export default function CheckinPage() {
       .order('timestamp', { ascending: true })
 
     if (todayLogs) {
-      const checkin = todayLogs.find(l => l.type === 'check-in')
-      const checkout = todayLogs.filter(l => l.type === 'check-out').pop()
+      const checkin = todayLogs.find(l => l.type === 'checkin')
+      const checkout = todayLogs.filter(l => l.type === 'checkout').pop()
 
       if (checkin && !checkout) {
         setIsCheckedIn(true)
@@ -91,8 +91,8 @@ export default function CheckinPage() {
 
     if (weekLogs) {
       let total = 0
-      const checkins = weekLogs.filter(l => l.type === 'check-in')
-      const checkouts = weekLogs.filter(l => l.type === 'check-out')
+      const checkins = weekLogs.filter(l => l.type === 'checkin')
+      const checkouts = weekLogs.filter(l => l.type === 'checkout')
       checkins.forEach((ci, i) => {
         const co = checkouts[i]
         if (co) {
@@ -151,7 +151,7 @@ export default function CheckinPage() {
       const { error: insertError } = await supabase.from('time_logs').insert({
         employee_id: employee.id,
         business_id: employee.business_id,
-        type: 'check-in',
+        type: 'checkin',
         timestamp: new Date().toISOString(),
         lat,
         lng,
@@ -189,7 +189,7 @@ export default function CheckinPage() {
       await supabase.from('time_logs').insert({
         employee_id: employee.id,
         business_id: employee.business_id,
-        type: 'check-out',
+        type: 'checkout',
         timestamp: new Date().toISOString(),
         lat,
         lng,
