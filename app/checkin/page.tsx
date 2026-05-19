@@ -362,6 +362,17 @@ export default function CheckinPage() {
         Report an issue with my hours
       </button>
 
+      {/* Sign out */}
+      <button
+        onClick={async () => {
+          await supabase.auth.signOut()
+          window.location.href = '/login'
+        }}
+        className="mt-3 text-sm text-gray-300 hover:text-gray-500 transition-colors"
+      >
+        Sign out
+      </button>
+
       {/* Checkout confirmation modal */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black/40 flex items-end justify-center z-50 pb-8 px-4">
