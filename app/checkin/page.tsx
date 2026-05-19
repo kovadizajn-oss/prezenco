@@ -18,6 +18,7 @@ export default function CheckinPage() {
   const [actionLoading, setActionLoading] = useState(false)
   const [error, setError] = useState('')
   const [now, setNow] = useState(new Date())
+  const [showConfirm, setShowConfirm] = useState(false)
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 60000)
@@ -248,7 +249,7 @@ export default function CheckinPage() {
 
       {/* Big check in/out button */}
       <button
-        onClick={isCheckedIn ? handleCheckout : handleCheckin}
+        onClick={isCheckedIn ? () => setShowConfirm(true) : handleCheckin}
         disabled={actionLoading}
         className={`w-48 h-48 rounded-full text-white font-bold text-xl shadow-lg transition-all active:scale-95 disabled:opacity-60 ${
           isCheckedIn
@@ -294,6 +295,29 @@ export default function CheckinPage() {
           </p>
           <p className="text-sm text-gray-500 mt-1">This week</p>
         </div>
+        {/* Checkout confirmation modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/40 flex items-end justify-center z-50 pb-8 px-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">Check out?</h3>
+            <p className="text-gray-500 text-sm mb-6">Are you sure you want to check out?</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setShowConfirm(false); handleCheckout() }}
+                className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl text-sm transition-colors"
+              >
+                Yes, check out
+              </button>
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl text-sm hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   )
