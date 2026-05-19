@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sign In | Prezenco",
-  description: "Sign in to your Prezenco account",
+  title: "Prezenco",
+  description: "Employee time tracking for your team",
 };
 
 export default function RootLayout({
