@@ -61,22 +61,28 @@ export default function CheckinPage() {
       .gte('timestamp', todayStart.toISOString())
       .order('timestamp', { ascending: true })
 
-    if (todayLogs) {
-      const checkin = todayLogs.find(l => l.type === 'checkin')
-      const checkout = todayLogs.filter(l => l.type === 'checkout').pop()
-
-      if (checkin && !checkout) {
-        setIsCheckedIn(true)
-        setLastCheckin(checkin.timestamp)
+      if (todayLogs) {
+        const lastCheckinLog = [...todayLogs].reverse().find(l => l.type === 'checkin')
+        const checkoutAfter = lastCheckinLog
+          ? todayLogs.find(l => l.type === 'checkout' && l.timestamp > lastCheckinLog.timestamp)
+          : null
+      
+        if (lastCheckinLog && !checkoutAfter) {
+          setIsCheckedIn(true)
+          setLastCheckin(lastCheckinLog.timestamp)
+        }
+      
+        const checkins = todayLogs.filter(l => l.type === 'checkin')
+        const checkouts = todayLogs.filter(l => l.type === 'checkout')
+        let todayTotal = 0
+        checkins.forEach((ci, i) => {
+          const co = checkouts[i]
+          if (co) todayTotal += Math.floor(
+            (new Date(co.timestamp).getTime() - new Date(ci.timestamp).getTime()) / 60000
+          )
+        })
+        setTodayMinutes(todayTotal)
       }
-
-      if (checkin && checkout) {
-        const mins = Math.floor(
-          (new Date(checkout.timestamp).getTime() - new Date(checkin.timestamp).getTime()) / 60000
-        )
-        setTodayMinutes(mins)
-      }
-    }
 
     // Get this week's logs
     const weekStart = new Date()
