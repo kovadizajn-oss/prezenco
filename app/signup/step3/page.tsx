@@ -21,30 +21,29 @@ export default function SignupStep3Page() {
     setSaving(true)
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not logged in.')
-
-      // Get the business id for this owner
-      const { data: business, error: bizError } = await supabase
-        .from('businesses')
-        .select('id')
-        .eq('owner_id', user.id)
-        .single()
-
-      if (bizError || !business) throw new Error('Could not find your business.')
-
-      // Insert employee
-      const { error: empError } = await supabase
-  .from('employees')
-  .insert({
-    full_name: name,
-    email,
-    business_id: business.id,
-  })
-
-      if (empError) throw empError
-
-      router.push('/dashboard')
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) throw new Error('Not logged in.')
+  
+        const { data: business, error: bizError } = await supabase
+          .from('businesses')
+          .select('id')
+          .eq('owner_id', user.id)
+          .single()
+  
+        if (bizError || !business) throw new Error('Could not find your business.')
+  
+        const { error: empError } = await supabase
+          .from('employees')
+          .insert({
+            full_name: name,
+            email,
+            business_id: business.id,
+          })
+  
+        if (empError) throw empError
+  
+        router.push('/dashboard')
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
       setError(message)
