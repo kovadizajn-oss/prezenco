@@ -20,6 +20,14 @@ export default function CheckinPage() {
   const [now, setNow] = useState(new Date())
   const [showConfirm, setShowConfirm] = useState(false)
 
+  // Report an issue state
+  const [showReport, setShowReport] = useState(false)
+  const [reportDate, setReportDate] = useState('')
+  const [reportMessage, setReportMessage] = useState('')
+  const [reportLoading, setReportLoading] = useState(false)
+  const [reportError, setReportError] = useState('')
+  const [reportSuccess, setReportSuccess] = useState(false)
+
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 60000)
     return () => clearInterval(interval)
@@ -28,6 +36,20 @@ export default function CheckinPage() {
   useEffect(() => {
     loadData()
   }, [])
+
+  // Set default report date to today when modal opens
+  useEffect(() => {
+    if (showReport) {
+      const today = new Date()
+      const yyyy = today.getFullYear()
+      const mm = String(today.getMonth() + 1).padStart(2, '0')
+      const dd = String(today.getDate()).padStart(2, '0')
+      setReportDate(`${yyyy}-${mm}-${dd}`)
+      setReportMessage('')
+      setReportError('')
+      setReportSuccess(false)
+    }
+  }, [showReport])
 
   const loadData = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -61,28 +83,28 @@ export default function CheckinPage() {
       .gte('timestamp', todayStart.toISOString())
       .order('timestamp', { ascending: true })
 
-      if (todayLogs) {
-        const lastCheckinLog = [...todayLogs].reverse().find(l => l.type === 'checkin')
-        const checkoutAfter = lastCheckinLog
-          ? todayLogs.find(l => l.type === 'checkout' && l.timestamp > lastCheckinLog.timestamp)
-          : null
-      
-        if (lastCheckinLog && !checkoutAfter) {
-          setIsCheckedIn(true)
-          setLastCheckin(lastCheckinLog.timestamp)
-        }
-      
-        const checkins = todayLogs.filter(l => l.type === 'checkin')
-        const checkouts = todayLogs.filter(l => l.type === 'checkout')
-        let todayTotal = 0
-        checkins.forEach((ci, i) => {
-          const co = checkouts[i]
-          if (co) todayTotal += Math.floor(
-            (new Date(co.timestamp).getTime() - new Date(ci.timestamp).getTime()) / 60000
-          )
-        })
-        setTodayMinutes(todayTotal)
+    if (todayLogs) {
+      const lastCheckinLog = [...todayLogs].reverse().find(l => l.type === 'checkin')
+      const checkoutAfter = lastCheckinLog
+        ? todayLogs.find(l => l.type === 'checkout' && l.timestamp > lastCheckinLog.timestamp)
+        : null
+
+      if (lastCheckinLog && !checkoutAfter) {
+        setIsCheckedIn(true)
+        setLastCheckin(lastCheckinLog.timestamp)
       }
+
+      const checkins = todayLogs.filter(l => l.type === 'checkin')
+      const checkouts = todayLogs.filter(l => l.type === 'checkout')
+      let todayTotal = 0
+      checkins.forEach((ci, i) => {
+        const co = checkouts[i]
+        if (co) todayTotal += Math.floor(
+          (new Date(co.timestamp).getTime() - new Date(ci.timestamp).getTime()) / 60000
+        )
+      })
+      setTodayMinutes(todayTotal)
+    }
 
     // Get this week's logs
     const weekStart = new Date()
@@ -171,16 +193,16 @@ export default function CheckinPage() {
       setIsCheckedIn(true)
       setLastCheckin(new Date().toISOString())
     } catch (err: any) {
-        if (err.code === 1) {
-          setError('Location access denied. Please allow location access to check in.')
-        } else if (err.code === 2) {
-          setError(`Location unavailable (code 2). ${err.message}`)
-        } else if (err.code === 3) {
-          setError(`Location timed out (code 3). ${err.message}`)
-        } else {
-          setError(`Error: ${err.message || JSON.stringify(err)}`)
-        }
-      } finally {
+      if (err.code === 1) {
+        setError('Location access denied. Please allow location access to check in.')
+      } else if (err.code === 2) {
+        setError(`Location unavailable (code 2). ${err.message}`)
+      } else if (err.code === 3) {
+        setError(`Location timed out (code 3). ${err.message}`)
+      } else {
+        setError(`Error: ${err.message || JSON.stringify(err)}`)
+      }
+    } finally {
       setActionLoading(false)
     }
   }
@@ -220,6 +242,37 @@ export default function CheckinPage() {
     }
   }
 
+  const handleReport = async () => {
+    if (!reportDate) {
+      setReportError('Please select a date.')
+      return
+    }
+    if (!reportMessage.trim()) {
+      setReportError('Please describe the issue.')
+      return
+    }
+
+    setReportLoading(true)
+    setReportError('')
+
+    const { error: insertError } = await supabase.from('correction_requests').insert({
+      employee_id: employee.id,
+      business_id: employee.business_id,
+      date: reportDate,
+      message: reportMessage.trim(),
+      status: 'pending',
+    })
+
+    if (insertError) {
+      setReportError('Failed to send. Please try again.')
+      setReportLoading(false)
+      return
+    }
+
+    setReportLoading(false)
+    setReportSuccess(true)
+  }
+
   const formatDuration = (minutes: number) => {
     const h = Math.floor(minutes / 60)
     const m = minutes % 60
@@ -227,8 +280,8 @@ export default function CheckinPage() {
   }
 
   const liveMinutes = lastCheckin
-  ? Math.max(0, Math.floor((now.getTime() - new Date(lastCheckin).getTime()) / 60000))
-  : 0
+    ? Math.max(0, Math.floor((now.getTime() - new Date(lastCheckin).getTime()) / 60000))
+    : 0
 
   if (loading) {
     return (
@@ -248,9 +301,7 @@ export default function CheckinPage() {
           </svg>
         </div>
         <h1 className="text-xl font-bold text-gray-900">{business?.name ?? 'Prezenco'}</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          {employee?.full_name ?? ''}
-        </p>
+        <p className="text-gray-500 text-sm mt-1">{employee?.full_name ?? ''}</p>
       </div>
 
       {/* Big check in/out button */}
@@ -301,7 +352,17 @@ export default function CheckinPage() {
           </p>
           <p className="text-sm text-gray-500 mt-1">This week</p>
         </div>
-        {/* Checkout confirmation modal */}
+      </div>
+
+      {/* Report an issue button */}
+      <button
+        onClick={() => setShowReport(true)}
+        className="mt-10 text-sm text-gray-400 hover:text-gray-600 underline underline-offset-2 transition-colors"
+      >
+        Report an issue with my hours
+      </button>
+
+      {/* Checkout confirmation modal */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black/40 flex items-end justify-center z-50 pb-8 px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
@@ -324,7 +385,85 @@ export default function CheckinPage() {
           </div>
         </div>
       )}
-      </div>
+
+      {/* Report an issue modal */}
+      {showReport && (
+        <div className="fixed inset-0 bg-black/40 flex items-end justify-center z-50 pb-8 px-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            {reportSuccess ? (
+              <div className="text-center py-4">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-3">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Request sent</h3>
+                <p className="text-gray-500 text-sm mb-6">Your employer will review your hours.</p>
+                <button
+                  onClick={() => setShowReport(false)}
+                  className="w-full py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl text-sm transition-colors"
+                >
+                  Done
+                </button>
+              </div>
+            ) : (
+              <>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Report an issue</h3>
+                <p className="text-gray-500 text-sm mb-5">Let your employer know about a problem with your hours.</p>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Date</label>
+                  <input
+                    type="date"
+                    value={reportDate}
+                    onChange={e => setReportDate(e.target.value)}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+
+                <div className="mb-5">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">What's the issue?</label>
+                  <textarea
+                    value={reportMessage}
+                    onChange={e => setReportMessage(e.target.value)}
+                    placeholder="e.g. I forgot to check out on Friday"
+                    rows={3}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+                  />
+                </div>
+
+                {reportError && (
+                  <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+                    {reportError}
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowReport(false)}
+                    disabled={reportLoading}
+                    className="flex-1 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl text-sm hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleReport}
+                    disabled={reportLoading}
+                    className="flex-1 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {reportLoading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Sending…
+                      </>
+                    ) : 'Send'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
