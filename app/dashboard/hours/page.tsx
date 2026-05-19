@@ -18,6 +18,7 @@ type ShiftRow = {
   checkout_id: string | null
   minutes: number | null
   manually_adjusted: boolean
+  adjustment_reason: string | null
 }
 
 type EditingShift = {
@@ -123,8 +124,7 @@ export default function HoursPage() {
 
     const { data: logs } = await supabase
       .from('time_logs')
-      .select('id, type, timestamp, manually_adjusted')
-      .eq('employee_id', selectedEmp)
+.select('id, type, timestamp, manually_adjusted, adjustment_reason')      .eq('employee_id', selectedEmp)
       .gte('timestamp', start.toISOString())
       .lte('timestamp', end.toISOString())
       .order('timestamp', { ascending: true })
@@ -159,6 +159,7 @@ export default function HoursPage() {
         checkout_id: co?.id ?? null,
         minutes,
         manually_adjusted: ci.manually_adjusted || co?.manually_adjusted,
+        adjustment_reason: ci.adjustment_reason || co?.adjustment_reason || null,
       })
     })
 
@@ -385,7 +386,8 @@ export default function HoursPage() {
                 <span></span>
               </div>
               {shifts.map((shift, i) => (
-                <div key={i} className="grid grid-cols-5 px-5 py-4 text-sm items-center">
+                <div key={i} className={`px-5 py-4 text-sm ${shift.manually_adjusted ? '' : ''}`}>
+                  <div className="grid grid-cols-5 items-center">
                   <span className="font-medium text-gray-900">{shift.date}</span>
                   <span className="text-gray-600">{shift.checkin ? formatTime(shift.checkin) : '—'}</span>
                   <span className="text-gray-600">
@@ -413,6 +415,12 @@ export default function HoursPage() {
                       </button>
                     )}
                   </span>
+                  </div>
+                  {shift.manually_adjusted && shift.adjustment_reason && (
+                    <p className="mt-1.5 text-xs text-amber-600 col-span-5">
+                      ✎ Adjusted: {shift.adjustment_reason}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
