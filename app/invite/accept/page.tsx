@@ -16,11 +16,33 @@ export default function AcceptInvitePage() {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    // Supabase puts the token in the URL hash — we just need the session to be set
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setReady(true)
-      else setError('This invite link is invalid or has expired. Please ask your employer to resend it.')
-    })
+    // Supabase invite links use a hash fragment with access_token
+    const hash = window.location.hash
+    const params = new URLSearchParams(hash.replace('#', ''))
+    const accessToken = params.get('access_token')
+    const refreshToken = params.get('refresh_token')
+
+    if (accessToken && refreshToken) {
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      }).then(({ error }) => {
+        if (error) {
+          setError('This invite link is invalid or has expired. Please ask your employer to resend it.')
+        } else {
+          setReady(true)
+        }
+      })
+    } else {
+      // Try existing session
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session) {
+          setReady(true)
+        } else {
+          setError('This invite link is invalid or has expired. Please ask your employer to resend it.')
+        }
+      })
+    }
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,19 +60,17 @@ export default function AcceptInvitePage() {
 
     setLoading(true)
     try {
-      // Set the password
       const { error: updateError } = await supabase.auth.updateUser({ password })
       if (updateError) throw updateError
 
-      // Link the employee record to this auth user
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase
           .from('employees')
-          .update({ 
+          .update({
             invite_accepted: true,
             user_id: user.id,
-            status: 'active'
+            status: 'active',
           })
           .eq('email', user.email)
       }
