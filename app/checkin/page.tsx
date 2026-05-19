@@ -365,6 +365,10 @@ export default function CheckinPage() {
       {/* Sign out */}
       <button
         onClick={async () => {
+          if (isCheckedIn) {
+            setError('Please check out before signing out.')
+            return
+          }
           await supabase.auth.signOut()
           window.location.href = '/login'
         }}
