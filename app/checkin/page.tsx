@@ -144,7 +144,7 @@ export default function CheckinPage() {
         : true
 
       if (!withinRadius) {
-        setError(`You are ${Math.round(distance)}m away from the workplace. You need to be within ${business.checkin_radius_metres}m to check in.`)
+        setError(`You are ${Math.round(distance)}m away from your workplace. Please make sure you are at work before checking in.`)
         setActionLoading(false)
         return
       }
