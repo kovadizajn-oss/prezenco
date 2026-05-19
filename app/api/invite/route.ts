@@ -2,20 +2,29 @@ import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
-  const { email } = await request.json()
+  try {
+    const { email } = await request.json()
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json({ error: 'Service role key not configured.' }, { status: 500 })
+    }
 
-  const { error } = await supabase.auth.admin.inviteUserByEmail(email, {
-    redirectTo: 'https://prezenco-app.vercel.app/invite/accept',
-  })
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 })
+    const { error } = await supabase.auth.admin.inviteUserByEmail(email, {
+      redirectTo: 'https://prezenco-app.vercel.app/invite/accept',
+    })
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
-
-  return NextResponse.json({ success: true })
 }
