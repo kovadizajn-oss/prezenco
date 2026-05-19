@@ -12,13 +12,6 @@ type Employee = {
   status: string
 }
 
-type TimeLog = {
-  id: string
-  employee_id: string
-  type: string
-  timestamp: string
-}
-
 type EmployeeWithLogs = Employee & {
   checkinTime: string | null
   checkoutTime: string | null
@@ -26,13 +19,24 @@ type EmployeeWithLogs = Employee & {
   isCheckedIn: boolean
 }
 
+type CorrectionRequest = {
+  id: string
+  employee_id: string
+  date: string
+  message: string
+  status: string
+  created_at: string
+  employee_name: string
+}
+
 export default function DashboardPage() {
   const supabase = createClient()
   const [employees, setEmployees] = useState<EmployeeWithLogs[]>([])
+  const [corrections, setCorrections] = useState<CorrectionRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [now, setNow] = useState(new Date())
+  const [resolvingId, setResolvingId] = useState<string | null>(null)
 
-  // Tick every minute to update live clocks
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 60000)
     return () => clearInterval(interval)
@@ -76,10 +80,10 @@ export default function DashboardPage() {
     const enriched: EmployeeWithLogs[] = emps.map((emp) => {
       const empLogs = (logs || []).filter(l => l.employee_id === emp.id)
       const lastCheckin = [...empLogs].reverse().find(l => l.type === 'checkin')
-const checkin = lastCheckin ?? null
-const checkout = lastCheckin
-  ? empLogs.find(l => l.type === 'checkout' && l.timestamp > lastCheckin.timestamp) ?? null
-  : null
+      const checkin = lastCheckin ?? null
+      const checkout = lastCheckin
+        ? empLogs.find(l => l.type === 'checkout' && l.timestamp > lastCheckin.timestamp) ?? null
+        : null
 
       let totalMinutes: number | null = null
       if (checkin && checkout) {
@@ -100,7 +104,37 @@ const checkout = lastCheckin
     })
 
     setEmployees(enriched)
+
+    // Load pending correction requests
+    const { data: requests } = await supabase
+      .from('correction_requests')
+      .select('id, employee_id, date, message, status, created_at')
+      .eq('business_id', business.id)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+
+    if (requests && requests.length > 0) {
+      // Attach employee names
+      const withNames: CorrectionRequest[] = requests.map(r => {
+        const emp = emps.find(e => e.id === r.employee_id)
+        return { ...r, employee_name: emp?.full_name ?? 'Unknown employee' }
+      })
+      setCorrections(withNames)
+    } else {
+      setCorrections([])
+    }
+
     setLoading(false)
+  }
+
+  const handleResolve = async (id: string) => {
+    setResolvingId(id)
+    await supabase
+      .from('correction_requests')
+      .update({ status: 'resolved' })
+      .eq('id', id)
+    setCorrections(prev => prev.filter(r => r.id !== id))
+    setResolvingId(null)
   }
 
   const formatTime = (iso: string) =>
@@ -112,11 +146,15 @@ const checkout = lastCheckin
     return h > 0 ? `${h}h ${m}m` : `${m}m`
   }
 
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
+
   const liveMinutes = (checkinIso: string) =>
     Math.floor((now.getTime() - new Date(checkinIso).getTime()) / 60000)
 
   const checkedIn = employees.filter(e => e.isCheckedIn)
-  const flags = employees.filter(e => e.isCheckedIn && e.checkinTime && liveMinutes(e.checkinTime) > 600)
+  const longShiftFlags = employees.filter(e => e.isCheckedIn && e.checkinTime && liveMinutes(e.checkinTime) > 600)
+  const showFlags = longShiftFlags.length > 0 || corrections.length > 0
 
   if (loading) {
     return (
@@ -196,11 +234,13 @@ const checkout = lastCheckin
       </section>
 
       {/* Flags */}
-      {flags.length > 0 && (
+      {showFlags && (
         <section>
           <h2 className="text-lg font-semibold text-gray-900 mb-3">⚠️ Flags</h2>
           <div className="bg-amber-50 border border-amber-200 rounded-2xl divide-y divide-amber-100">
-            {flags.map(emp => (
+
+            {/* Long shift flags */}
+            {longShiftFlags.map(emp => (
               <div key={emp.id} className="flex items-center justify-between px-5 py-4">
                 <span className="font-medium text-amber-900">{emp.full_name}</span>
                 <span className="text-sm text-amber-700">
@@ -208,6 +248,34 @@ const checkout = lastCheckin
                 </span>
               </div>
             ))}
+
+            {/* Correction requests */}
+            {corrections.map(req => (
+              <div key={req.id} className="px-5 py-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium text-amber-900">{req.employee_name}</span>
+                      <span className="text-xs text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">
+                        Hours issue
+                      </span>
+                    </div>
+                    <p className="text-sm text-amber-700 mb-0.5">
+                      {formatDate(req.date)}
+                    </p>
+                    <p className="text-sm text-amber-800">{req.message}</p>
+                  </div>
+                  <button
+                    onClick={() => handleResolve(req.id)}
+                    disabled={resolvingId === req.id}
+                    className="shrink-0 text-xs px-3 py-1.5 bg-white border border-amber-300 text-amber-800 rounded-lg hover:bg-amber-50 transition-colors disabled:opacity-50"
+                  >
+                    {resolvingId === req.id ? 'Resolving…' : 'Mark resolved'}
+                  </button>
+                </div>
+              </div>
+            ))}
+
           </div>
         </section>
       )}
