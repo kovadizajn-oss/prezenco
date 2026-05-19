@@ -84,7 +84,19 @@ export function LoginForm() {
       });
 
       // Full navigation so middleware receives auth cookies on the next request
-      window.location.assign("/dashboard");
+      // Check if this user is an employee or an owner
+const supabase2 = createClient()
+const { data: employeeRow } = await supabase2
+  .from('employees')
+  .select('id')
+  .eq('user_id', result.data.user?.id)
+  .single()
+
+if (employeeRow) {
+  window.location.assign('/checkin')
+} else {
+  window.location.assign('/dashboard')
+}
     } catch (err) {
       console.error("[login] Unexpected error during sign-in", err);
       setError("Invalid email or password.");
