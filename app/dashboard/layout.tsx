@@ -1,7 +1,12 @@
 'use client'
 
-import Link from 'next/link'
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation'
+import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 
 const navItems = [
   {
@@ -54,6 +59,27 @@ const navItems = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+
+  const router = useRouter()
+const supabase = createClient()
+
+useEffect(() => {
+  const checkRole = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const { data: employeeRow } = await supabase
+      .from('employees')
+      .select('id')
+      .eq('user_id', user.id)
+      .single()
+
+    if (employeeRow) {
+      router.replace('/checkin')
+    }
+  }
+  checkRole()
+}, [])
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
