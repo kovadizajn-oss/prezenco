@@ -28,7 +28,10 @@ export default function LoginPage() {
 
           {/* Footer text */}
           <p className="text-center text-xs text-muted-foreground">
-            Accounts are created by invitation only.
+            Are you a business owner?{' '}
+            <a href="/signup" className="text-green-600 font-medium hover:underline">
+              Create an account
+            </a>
           </p>
         </div>
       </div>
