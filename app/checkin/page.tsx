@@ -164,12 +164,16 @@ export default function CheckinPage() {
       setIsCheckedIn(true)
       setLastCheckin(new Date().toISOString())
     } catch (err: any) {
-      if (err.code === 1) {
-        setError('Location access denied. Please allow location access to check in.')
-      } else {
-        setError('Could not get your location. Please try again.')
-      }
-    } finally {
+        if (err.code === 1) {
+          setError('Location access denied. Please allow location access to check in.')
+        } else if (err.code === 2) {
+          setError(`Location unavailable (code 2). ${err.message}`)
+        } else if (err.code === 3) {
+          setError(`Location timed out (code 3). ${err.message}`)
+        } else {
+          setError(`Error: ${err.message || JSON.stringify(err)}`)
+        }
+      } finally {
       setActionLoading(false)
     }
   }
