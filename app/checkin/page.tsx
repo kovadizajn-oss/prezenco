@@ -213,8 +213,8 @@ export default function CheckinPage() {
   }
 
   const liveMinutes = lastCheckin
-    ? Math.floor((now.getTime() - new Date(lastCheckin).getTime()) / 60000)
-    : 0
+  ? Math.max(0, Math.floor((now.getTime() - new Date(lastCheckin).getTime()) / 60000))
+  : 0
 
   if (loading) {
     return (
