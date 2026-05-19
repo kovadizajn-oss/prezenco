@@ -147,7 +147,7 @@ export default function CheckinPage() {
         return
       }
 
-      await supabase.from('time_logs').insert({
+      const { error: insertError } = await supabase.from('time_logs').insert({
         employee_id: employee.id,
         business_id: employee.business_id,
         type: 'check-in',
@@ -157,6 +157,8 @@ export default function CheckinPage() {
         within_radius: withinRadius,
         manually_adjusted: false,
       })
+
+      if (insertError) throw insertError
 
       setIsCheckedIn(true)
       setLastCheckin(new Date().toISOString())
