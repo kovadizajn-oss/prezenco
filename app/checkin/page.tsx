@@ -110,8 +110,9 @@ export default function CheckinPage() {
   const getLocation = (): Promise<GeolocationPosition> => {
     return new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(resolve, reject, {
-        enableHighAccuracy: true,
-        timeout: 10000,
+        enableHighAccuracy: false,
+        timeout: 30000,
+        maximumAge: 60000,
       })
     })
   }
