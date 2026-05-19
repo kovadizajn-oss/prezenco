@@ -21,29 +21,41 @@ export default function SignupStep3Page() {
     setSaving(true)
 
     try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) throw new Error('Not logged in.')
-  
-        const { data: business, error: bizError } = await supabase
-          .from('businesses')
-          .select('id')
-          .eq('owner_id', user.id)
-          .single()
-  
-        if (bizError || !business) throw new Error('Could not find your business.')
-  
-        const { error: empError } = await supabase
-          .from('employees')
-          .insert({
-            full_name: name,
-            email,
-            business_id: business.id,
-          })
-  
-        if (empError) throw empError
-  
-        router.push('/dashboard')
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not logged in.')
+
+      const { data: business, error: bizError } = await supabase
+        .from('businesses')
+        .select('id')
+        .eq('owner_id', user.id)
+        .single()
+
+      if (bizError || !business) throw new Error('Could not find your business.')
+
+      const { error: empError } = await supabase
+        .from('employees')
+        .insert({
+          full_name: name,
+          email,
+          business_id: business.id,
+          status: 'active',
+          invite_accepted: false,
+        })
+
+      if (empError) throw empError
+
+      const res = await fetch('/api/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to send invite email.')
       }
+
+      router.push('/dashboard')
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
       setError(message)
@@ -69,7 +81,6 @@ export default function SignupStep3Page() {
       </div>
 
       <div className="w-full max-w-md bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
-        {/* Step indicator */}
         <div className="flex items-center gap-2 mb-6">
           <div className="flex items-center gap-1.5">
             <span className="w-7 h-7 rounded-full bg-green-100 text-green-600 text-xs font-semibold flex items-center justify-center">✓</span>
