@@ -92,7 +92,7 @@ useEffect(() => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <span className="font-bold text-gray-900 text-lg">Prezenco</span>
+          <span className="font-bold text-gray-900 text-lg">Zummo</span>
         </div>
 
         {/* Nav items */}

@@ -92,13 +92,13 @@ export default function AcceptInvitePage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">Prezenco</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Zummo</h1>
         <p className="text-gray-500 text-sm mt-1">Employee time tracking</p>
       </div>
 
       <div className="w-full max-w-md bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-1">Set your password</h2>
-        <p className="text-gray-500 text-sm mb-6">You've been invited to Prezenco. Create a password to activate your account.</p>
+        <p className="text-gray-500 text-sm mb-6">You've been invited to Zummo. Create a password to activate your account.</p>
 
         {!ready && !error && (
           <div className="flex items-center justify-center py-8">

@@ -68,7 +68,7 @@ export default function SignupStep1Page() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">Prezenco</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Zummo</h1>
         <p className="text-gray-500 text-sm mt-1">Employee time tracking</p>
       </div>
 
@@ -93,7 +93,7 @@ export default function SignupStep1Page() {
         </div>
 
         <h2 className="text-xl font-semibold text-gray-900 mb-1">Create your account</h2>
-        <p className="text-gray-500 text-sm mb-6">Set up Prezenco for your business. Takes 2 minutes.</p>
+        <p className="text-gray-500 text-sm mb-6">Set up Zummo for your business. Takes 2 minutes.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

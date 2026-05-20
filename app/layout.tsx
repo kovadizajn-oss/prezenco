@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Prezenco",
+  title: "Zummo",
   description: "Employee time tracking for your team",
 };
 

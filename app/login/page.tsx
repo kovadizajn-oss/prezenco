@@ -8,7 +8,7 @@ export default function LoginPage() {
           {/* Logo */}
           <div className="flex flex-col items-center gap-2">
             <h1 className="text-3xl font-bold tracking-tight text-primary">
-              Prezenco
+              Zummo
             </h1>
           </div>
 

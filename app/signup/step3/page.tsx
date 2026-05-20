@@ -76,7 +76,7 @@ export default function SignupStep3Page() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">Prezenco</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Zummo</h1>
         <p className="text-gray-500 text-sm mt-1">Employee time tracking</p>
       </div>
 
