@@ -35,6 +35,8 @@ export default function CheckinPage() {
 
   useEffect(() => {
     loadData()
+    const interval = setInterval(loadData, 30000)
+    return () => clearInterval(interval)
   }, [])
 
   // Set default report date to today when modal opens
