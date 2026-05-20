@@ -40,7 +40,7 @@ export default function LandingPage() {
                 Simple clock-ins. GPS verified. Instant reports. Built for small businesses that move fast.
               </p>
               <Link
-                href="/signup"
+                href="/login"
                 className="inline-flex items-center px-8 py-4 text-lg font-semibold text-white border-2 border-white rounded-lg hover:bg-white hover:text-[#22c55e] transition-colors duration-200"
               >
                 Get started
@@ -141,8 +141,7 @@ export default function LandingPage() {
                   {plan.employees}
                 </p>
                 <Link
-                  href={plan.price === 'Custom' ? 'mailto:contact@zummo.com' : '/signup'}
-                  className={`mt-auto w-full py-3 px-6 rounded-lg font-semibold transition-colors duration-200 text-center ${
+href={plan.price === 'Custom' ? 'mailto:contact@zummo.com' : '/login'}                  className={`mt-auto w-full py-3 px-6 rounded-lg font-semibold transition-colors duration-200 text-center ${
                     plan.popular
                       ? 'bg-white text-[#22c55e] hover:bg-white/90'
                       : 'bg-zinc-900 text-white hover:bg-zinc-800'
@@ -175,8 +174,7 @@ export default function LandingPage() {
               <span className="font-bold text-zinc-900">Zummo</span>
             </div>
             <nav className="flex items-center gap-8">
-              <a href="#pricing" className="text-zinc-500 hover:text-zinc-900 transition-colors text-sm font-medium">Pricing</a>
-              <a href="/privacy" className="text-zinc-500 hover:text-zinc-900 transition-colors text-sm font-medium">Privacy Policy</a>
+            <a href="mailto:contact@zummo.com" className="text-zinc-500 hover:text-zinc-900 transition-colors text-sm font-medium">contact@zummo.com</a>              <a href="/privacy" className="text-zinc-500 hover:text-zinc-900 transition-colors text-sm font-medium">Privacy Policy</a>
               <a href="mailto:contact@zummo.com" className="text-zinc-500 hover:text-zinc-900 transition-colors text-sm font-medium">contact@zummo.com</a>
             </nav>
             <div className="text-zinc-500 text-sm">© 2026 Zummo</div>
