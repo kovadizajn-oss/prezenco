@@ -29,6 +29,14 @@ type CorrectionRequest = {
   employee_name: string
 }
 
+type ForceCheckout = {
+  employee_id: string
+  employee_name: string
+  business_id: string
+  checkout_time: string
+  reason: string
+}
+
 export default function DashboardPage() {
   const supabase = createClient()
   const [employees, setEmployees] = useState<EmployeeWithLogs[]>([])
@@ -36,6 +44,13 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [now, setNow] = useState(new Date())
   const [resolvingId, setResolvingId] = useState<string | null>(null)
+  const [businessId, setBusinessId] = useState('')
+  const [ownerName, setOwnerName] = useState('')
+
+  // Force checkout modal
+  const [forceCheckout, setForceCheckout] = useState<ForceCheckout | null>(null)
+  const [forceSaving, setForceSaving] = useState(false)
+  const [forceError, setForceError] = useState('')
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 60000)
@@ -54,11 +69,13 @@ export default function DashboardPage() {
 
     const { data: business } = await supabase
       .from('businesses')
-      .select('id')
+      .select('id, owner_name')
       .eq('owner_id', user.id)
       .single()
 
     if (!business) return
+    setBusinessId(business.id)
+    setOwnerName(business.owner_name ?? '')
 
     const { data: emps } = await supabase
       .from('employees')
@@ -68,7 +85,6 @@ export default function DashboardPage() {
 
     if (!emps) return
 
-    // Get today's time logs for all employees
     const todayStart = new Date()
     todayStart.setHours(0, 0, 0, 0)
 
@@ -107,7 +123,6 @@ export default function DashboardPage() {
 
     setEmployees(enriched)
 
-    // Load pending correction requests
     const { data: requests } = await supabase
       .from('correction_requests')
       .select('id, employee_id, date, message, status, created_at')
@@ -116,7 +131,6 @@ export default function DashboardPage() {
       .order('created_at', { ascending: false })
 
     if (requests && requests.length > 0) {
-      // Attach employee names
       const withNames: CorrectionRequest[] = requests.map(r => {
         const emp = emps.find(e => e.id === r.employee_id)
         return { ...r, employee_name: emp?.full_name ?? 'Unknown employee' }
@@ -131,12 +145,61 @@ export default function DashboardPage() {
 
   const handleResolve = async (id: string) => {
     setResolvingId(id)
-    await supabase
-      .from('correction_requests')
-      .update({ status: 'resolved' })
-      .eq('id', id)
+    await supabase.from('correction_requests').update({ status: 'resolved' }).eq('id', id)
     setCorrections(prev => prev.filter(r => r.id !== id))
     setResolvingId(null)
+  }
+
+  const openForceCheckout = (emp: EmployeeWithLogs) => {
+    const now = new Date()
+    const hh = String(now.getHours()).padStart(2, '0')
+    const mm = String(now.getMinutes()).padStart(2, '0')
+    setForceError('')
+    setForceCheckout({
+      employee_id: emp.id,
+      employee_name: emp.full_name,
+      business_id: businessId,
+      checkout_time: `${hh}:${mm}`,
+      reason: '',
+    })
+  }
+
+  const handleForceCheckout = async () => {
+    if (!forceCheckout) return
+    if (!forceCheckout.reason.trim()) {
+      setForceError('Please enter a reason.')
+      return
+    }
+
+    setForceSaving(true)
+    setForceError('')
+
+    const [hours, minutes] = forceCheckout.checkout_time.split(':').map(Number)
+    const checkoutDate = new Date()
+    checkoutDate.setHours(hours, minutes, 0, 0)
+
+    const { error } = await supabase.from('time_logs').insert({
+      employee_id: forceCheckout.employee_id,
+      business_id: forceCheckout.business_id,
+      type: 'checkout',
+      timestamp: checkoutDate.toISOString(),
+      lat: 0,
+      lng: 0,
+      within_radius: true,
+      manually_adjusted: true,
+      adjusted_by: ownerName,
+      adjustment_reason: forceCheckout.reason.trim(),
+    })
+
+    if (error) {
+      setForceError('Failed to check out. Please try again.')
+      setForceSaving(false)
+      return
+    }
+
+    setForceSaving(false)
+    setForceCheckout(null)
+    await loadDashboard()
   }
 
   const formatTime = (iso: string) =>
@@ -184,11 +247,19 @@ export default function DashboardPage() {
                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                   <span className="font-medium text-gray-900">{emp.full_name}</span>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-500">Since {formatTime(emp.checkinTime!)}</p>
-                  <p className="text-sm font-semibold text-green-600">
-                    {formatDuration(liveMinutes(emp.checkinTime!))}
-                  </p>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-sm text-gray-500">Since {formatTime(emp.checkinTime!)}</p>
+                    <p className="text-sm font-semibold text-green-600">
+                      {formatDuration(liveMinutes(emp.checkinTime!))}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => openForceCheckout(emp)}
+                    className="text-xs text-gray-400 hover:text-red-500 border border-gray-200 hover:border-red-200 rounded-lg px-2.5 py-1 transition-colors"
+                  >
+                    Check out
+                  </button>
                 </div>
               </div>
             ))}
@@ -211,9 +282,7 @@ export default function DashboardPage() {
             {employees.map(emp => (
               <div
                 key={emp.id}
-                className={`flex items-center justify-between px-5 py-4 ${
-                  !emp.checkinTime ? 'opacity-50' : ''
-                }`}
+                className={`flex items-center justify-between px-5 py-4 ${!emp.checkinTime ? 'opacity-50' : ''}`}
               >
                 <span className="font-medium text-gray-900">{emp.full_name}</span>
                 <div className="flex items-center gap-6 text-sm text-gray-500">
@@ -240,8 +309,6 @@ export default function DashboardPage() {
         <section>
           <h2 className="text-lg font-semibold text-gray-900 mb-3">⚠️ Flags</h2>
           <div className="bg-amber-50 border border-amber-200 rounded-2xl divide-y divide-amber-100">
-
-            {/* Long shift flags */}
             {longShiftFlags.map(emp => (
               <div key={emp.id} className="flex items-center justify-between px-5 py-4">
                 <span className="font-medium text-amber-900">{emp.full_name}</span>
@@ -250,21 +317,15 @@ export default function DashboardPage() {
                 </span>
               </div>
             ))}
-
-            {/* Correction requests */}
             {corrections.map(req => (
               <div key={req.id} className="px-5 py-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-medium text-amber-900">{req.employee_name}</span>
-                      <span className="text-xs text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">
-                        Hours issue
-                      </span>
+                      <span className="text-xs text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full">Hours issue</span>
                     </div>
-                    <p className="text-sm text-amber-700 mb-0.5">
-                      {formatDate(req.date)}
-                    </p>
+                    <p className="text-sm text-amber-700 mb-0.5">{formatDate(req.date)}</p>
                     <p className="text-sm text-amber-800">{req.message}</p>
                   </div>
                   <button
@@ -277,9 +338,77 @@ export default function DashboardPage() {
                 </div>
               </div>
             ))}
-
           </div>
         </section>
+      )}
+
+      {/* Force Checkout Modal */}
+      {forceCheckout && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => { if (!forceSaving) setForceCheckout(null) }}
+          />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 z-10">
+            <h2 className="text-base font-semibold text-gray-900 mb-1">
+              Check out {forceCheckout.employee_name}
+            </h2>
+            <p className="text-xs text-gray-400 mb-5">
+              Set the actual checkout time and enter a reason.
+            </p>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Checkout time</label>
+              <input
+                type="time"
+                value={forceCheckout.checkout_time}
+                onChange={e => setForceCheckout({ ...forceCheckout, checkout_time: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+            </div>
+
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Reason <span className="text-red-400">*</span>
+              </label>
+              <textarea
+                value={forceCheckout.reason}
+                onChange={e => setForceCheckout({ ...forceCheckout, reason: e.target.value })}
+                placeholder="e.g. Employee forgot to check out"
+                rows={2}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+              />
+            </div>
+
+            {forceError && (
+              <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+                {forceError}
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setForceCheckout(null)}
+                disabled={forceSaving}
+                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleForceCheckout}
+                disabled={forceSaving}
+                className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {forceSaving ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Saving…
+                  </>
+                ) : 'Check out'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
     </div>
