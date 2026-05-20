@@ -261,6 +261,27 @@ export default function CheckinPage() {
     }
   }
 
+      const mins = lastCheckin
+        ? Math.max(0, Math.floor((new Date(checkoutTime).getTime() - new Date(lastCheckin).getTime()) / 60000))
+        : 0
+
+      setCheckoutSummary({
+        checkinTime: lastCheckin ?? checkoutTime,
+        checkoutTime,
+        minutes: mins,
+      })
+
+      setIsCheckedIn(false)
+      setTodayMinutes(prev => prev + mins)
+      setWeekMinutes(prev => prev + mins)
+      setLastCheckin(null)
+    } catch {
+      setError('Could not get your location. Please try again.')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
   const handleReport = async () => {
     if (!reportDate) {
       setReportError('Please select a date.')
