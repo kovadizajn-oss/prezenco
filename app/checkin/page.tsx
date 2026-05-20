@@ -91,10 +91,13 @@ export default function CheckinPage() {
         ? todayLogs.find(l => l.type === 'checkout' && l.timestamp > lastCheckinLog.timestamp)
         : null
 
-      if (lastCheckinLog && !checkoutAfter) {
-        setIsCheckedIn(true)
-        setLastCheckin(lastCheckinLog.timestamp)
-      }
+        if (lastCheckinLog && !checkoutAfter) {
+          setIsCheckedIn(true)
+          setLastCheckin(lastCheckinLog.timestamp)
+        } else {
+          setIsCheckedIn(false)
+          setLastCheckin(null)
+        }
 
       const checkins = todayLogs.filter(l => l.type === 'checkin')
       const checkouts = todayLogs.filter(l => l.type === 'checkout')
