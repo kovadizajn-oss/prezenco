@@ -238,25 +238,32 @@ export default function CheckinPage() {
       const pos = await getLocation()
       const { latitude: lat, longitude: lng } = pos.coords
 
+      const checkoutTime = new Date().toISOString()
+
       await supabase.from('time_logs').insert({
         employee_id: employee.id,
         business_id: employee.business_id,
         type: 'checkout',
-        timestamp: new Date().toISOString(),
+        timestamp: checkoutTime,
         lat,
         lng,
         within_radius: true,
         manually_adjusted: false,
       })
 
+      const mins = lastCheckin
+        ? Math.max(0, Math.floor((new Date(checkoutTime).getTime() - new Date(lastCheckin).getTime()) / 60000))
+        : 0
+
+      setCheckoutSummary({
+        checkinTime: lastCheckin ?? checkoutTime,
+        checkoutTime,
+        minutes: mins,
+      })
+
       setIsCheckedIn(false)
-      if (lastCheckin) {
-        const mins = Math.floor(
-          (new Date().getTime() - new Date(lastCheckin).getTime()) / 60000
-        )
-        setTodayMinutes(prev => prev + mins)
-        setWeekMinutes(prev => prev + mins)
-      }
+      setTodayMinutes(prev => prev + mins)
+      setWeekMinutes(prev => prev + mins)
       setLastCheckin(null)
     } catch {
       setError('Could not get your location. Please try again.')
