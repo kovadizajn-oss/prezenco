@@ -61,17 +61,6 @@ export default function CheckinPage() {
   }, [showReport])
 
   const loadData = async () => {
-    const checkoutTime = new Date().toISOString()
-      const mins = lastCheckin
-        ? Math.max(0, Math.floor((new Date(checkoutTime).getTime() - new Date(lastCheckin).getTime()) / 60000))
-        : 0
-      setCheckoutSummary({
-        checkinTime: lastCheckin ?? checkoutTime,
-        checkoutTime,
-        minutes: mins,
-      })
-    setIsCheckedIn(false)
-    setLastCheckin(null)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
