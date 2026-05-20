@@ -262,7 +262,7 @@ export default function DashboardPage() {
     <div className="p-6 max-w-4xl mx-auto space-y-8">
 
       {/* Week stat */}
-      {weekMinutes > 0 && (
+      {(
         <div className="bg-white border border-gray-200 rounded-2xl px-6 py-4 flex items-center justify-between">
           <span className="text-sm text-gray-500">Your team worked this week</span>
           <span className="text-lg font-bold text-gray-900">{formatDuration(weekMinutes)}</span>
