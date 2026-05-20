@@ -101,9 +101,9 @@ export default function CheckinPage() {
       let todayTotal = 0
       checkins.forEach((ci, i) => {
         const co = checkouts[i]
-        if (co) todayTotal += Math.floor(
+        if (co) todayTotal += Math.max(0, Math.floor(
           (new Date(co.timestamp).getTime() - new Date(ci.timestamp).getTime()) / 60000
-        )
+        ))
       })
       setTodayMinutes(todayTotal)
     }
@@ -127,9 +127,9 @@ export default function CheckinPage() {
       checkins.forEach((ci, i) => {
         const co = checkouts[i]
         if (co) {
-          total += Math.floor(
+          total += Math.max(0, Math.floor(
             (new Date(co.timestamp).getTime() - new Date(ci.timestamp).getTime()) / 60000
-          )
+          ))
         }
       })
       setWeekMinutes(total)
