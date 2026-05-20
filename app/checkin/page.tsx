@@ -27,6 +27,13 @@ export default function CheckinPage() {
   const [reportLoading, setReportLoading] = useState(false)
   const [reportError, setReportError] = useState('')
   const [reportSuccess, setReportSuccess] = useState(false)
+  // Checkout summary state
+  const [checkoutSummary, setCheckoutSummary] = useState<{
+    checkinTime: string
+    checkoutTime: string
+    minutes: number
+  } | null>(null)
+  
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 60000)
@@ -54,6 +61,15 @@ export default function CheckinPage() {
   }, [showReport])
 
   const loadData = async () => {
+    const checkoutTime = new Date().toISOString()
+      const mins = lastCheckin
+        ? Math.max(0, Math.floor((new Date(checkoutTime).getTime() - new Date(lastCheckin).getTime()) / 60000))
+        : 0
+      setCheckoutSummary({
+        checkinTime: lastCheckin ?? checkoutTime,
+        checkoutTime,
+        minutes: mins,
+      })
     setIsCheckedIn(false)
     setLastCheckin(null)
     const { data: { user } } = await supabase.auth.getUser()
@@ -480,6 +496,46 @@ export default function CheckinPage() {
                       </>
                     ) : 'Send'}
                   </button>
+                  {/* Checkout summary modal */}
+      {checkoutSummary && (
+        <div className="fixed inset-0 bg-black/40 flex items-end justify-center z-50 pb-8 px-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-3">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">Checked out!</h3>
+              <p className="text-gray-500 text-sm">Here's your shift summary</p>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Check in</span>
+                <span className="font-medium text-gray-900">
+                  {new Date(checkoutSummary.checkinTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Check out</span>
+                <span className="font-medium text-gray-900">
+                  {new Date(checkoutSummary.checkoutTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+              <div className="border-t border-gray-200 pt-2 flex justify-between text-sm">
+                <span className="text-gray-500">Duration</span>
+                <span className="font-bold text-gray-900">{formatDuration(checkoutSummary.minutes)}</span>
+              </div>
+            </div>
+            <button
+              onClick={() => setCheckoutSummary(null)}
+              className="w-full py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl text-sm transition-colors"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
                 </div>
               </>
             )}
