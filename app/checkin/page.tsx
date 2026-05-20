@@ -20,6 +20,13 @@ export default function CheckinPage() {
   const [now, setNow] = useState(new Date())
   const [showConfirm, setShowConfirm] = useState(false)
 
+  // Checkout summary state
+  const [checkoutSummary, setCheckoutSummary] = useState<{
+    checkinTime: string
+    checkoutTime: string
+    minutes: number
+  } | null>(null)
+
   // Report an issue state
   const [showReport, setShowReport] = useState(false)
   const [reportDate, setReportDate] = useState('')
@@ -27,13 +34,6 @@ export default function CheckinPage() {
   const [reportLoading, setReportLoading] = useState(false)
   const [reportError, setReportError] = useState('')
   const [reportSuccess, setReportSuccess] = useState(false)
-  // Checkout summary state
-  const [checkoutSummary, setCheckoutSummary] = useState<{
-    checkinTime: string
-    checkoutTime: string
-    minutes: number
-  } | null>(null)
-  
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 60000)
@@ -98,13 +98,10 @@ export default function CheckinPage() {
         ? todayLogs.find(l => l.type === 'checkout' && l.timestamp > lastCheckinLog.timestamp)
         : null
 
-        if (lastCheckinLog && !checkoutAfter) {
-          setIsCheckedIn(true)
-          setLastCheckin(lastCheckinLog.timestamp)
-        } else {
-          setIsCheckedIn(false)
-          setLastCheckin(null)
-        }
+      if (lastCheckinLog && !checkoutAfter) {
+        setIsCheckedIn(true)
+        setLastCheckin(lastCheckinLog.timestamp)
+      }
 
       const checkins = todayLogs.filter(l => l.type === 'checkin')
       const checkouts = todayLogs.filter(l => l.type === 'checkout')
@@ -227,40 +224,20 @@ export default function CheckinPage() {
       const pos = await getLocation()
       const { latitude: lat, longitude: lng } = pos.coords
 
-      const checkoutTime = new Date().toISOString()
-
       await supabase.from('time_logs').insert({
         employee_id: employee.id,
         business_id: employee.business_id,
         type: 'checkout',
-        timestamp: checkoutTime,
+        timestamp: new Date().toISOString(),
         lat,
         lng,
         within_radius: true,
         manually_adjusted: false,
       })
 
-      const mins = lastCheckin
-        ? Math.max(0, Math.floor((new Date(checkoutTime).getTime() - new Date(lastCheckin).getTime()) / 60000))
-        : 0
+      const checkoutTime = new Date().toISOString()
 
-      setCheckoutSummary({
-        checkinTime: lastCheckin ?? checkoutTime,
-        checkoutTime,
-        minutes: mins,
-      })
-
-      setIsCheckedIn(false)
-      setTodayMinutes(prev => prev + mins)
-      setWeekMinutes(prev => prev + mins)
-      setLastCheckin(null)
-    } catch {
-      setError('Could not get your location. Please try again.')
-    } finally {
-      setActionLoading(false)
-    }
-  }
-
+      const checkoutTime = new Date().toISOString()
       const mins = lastCheckin
         ? Math.max(0, Math.floor((new Date(checkoutTime).getTime() - new Date(lastCheckin).getTime()) / 60000))
         : 0
@@ -513,7 +490,13 @@ export default function CheckinPage() {
                       </>
                     ) : 'Send'}
                   </button>
-                  {/* Checkout summary modal */}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+      {/* Checkout summary modal */}
       {checkoutSummary && (
         <div className="fixed inset-0 bg-black/40 flex items-end justify-center z-50 pb-8 px-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
@@ -550,12 +533,6 @@ export default function CheckinPage() {
             >
               Done
             </button>
-          </div>
-        </div>
-      )}
-                </div>
-              </>
-            )}
           </div>
         </div>
       )}
