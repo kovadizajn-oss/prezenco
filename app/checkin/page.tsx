@@ -20,13 +20,6 @@ export default function CheckinPage() {
   const [now, setNow] = useState(new Date())
   const [showConfirm, setShowConfirm] = useState(false)
 
-  // Checkout summary state
-  const [checkoutSummary, setCheckoutSummary] = useState<{
-    checkinTime: string
-    checkoutTime: string
-    minutes: number
-  } | null>(null)
-
   // Report an issue state
   const [showReport, setShowReport] = useState(false)
   const [reportDate, setReportDate] = useState('')
@@ -61,6 +54,8 @@ export default function CheckinPage() {
   }, [showReport])
 
   const loadData = async () => {
+    setIsCheckedIn(false)
+    setLastCheckin(null)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
@@ -98,10 +93,13 @@ export default function CheckinPage() {
         ? todayLogs.find(l => l.type === 'checkout' && l.timestamp > lastCheckinLog.timestamp)
         : null
 
-      if (lastCheckinLog && !checkoutAfter) {
-        setIsCheckedIn(true)
-        setLastCheckin(lastCheckinLog.timestamp)
-      }
+        if (lastCheckinLog && !checkoutAfter) {
+          setIsCheckedIn(true)
+          setLastCheckin(lastCheckinLog.timestamp)
+        } else {
+          setIsCheckedIn(false)
+          setLastCheckin(null)
+        }
 
       const checkins = todayLogs.filter(l => l.type === 'checkin')
       const checkouts = todayLogs.filter(l => l.type === 'checkout')
@@ -235,22 +233,14 @@ export default function CheckinPage() {
         manually_adjusted: false,
       })
 
-      const checkoutTime = new Date().toISOString()
-
-      const checkoutTime = new Date().toISOString()
-      const mins = lastCheckin
-        ? Math.max(0, Math.floor((new Date(checkoutTime).getTime() - new Date(lastCheckin).getTime()) / 60000))
-        : 0
-
-      setCheckoutSummary({
-        checkinTime: lastCheckin ?? checkoutTime,
-        checkoutTime,
-        minutes: mins,
-      })
-
       setIsCheckedIn(false)
-      setTodayMinutes(prev => prev + mins)
-      setWeekMinutes(prev => prev + mins)
+      if (lastCheckin) {
+        const mins = Math.floor(
+          (new Date().getTime() - new Date(lastCheckin).getTime()) / 60000
+        )
+        setTodayMinutes(prev => prev + mins)
+        setWeekMinutes(prev => prev + mins)
+      }
       setLastCheckin(null)
     } catch {
       setError('Could not get your location. Please try again.')
@@ -493,46 +483,6 @@ export default function CheckinPage() {
                 </div>
               </>
             )}
-          </div>
-        </div>
-      )}
-      {/* Checkout summary modal */}
-      {checkoutSummary && (
-        <div className="fixed inset-0 bg-black/40 flex items-end justify-center z-50 pb-8 px-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-3">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">Checked out!</h3>
-              <p className="text-gray-500 text-sm">Here's your shift summary</p>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Check in</span>
-                <span className="font-medium text-gray-900">
-                  {new Date(checkoutSummary.checkinTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Check out</span>
-                <span className="font-medium text-gray-900">
-                  {new Date(checkoutSummary.checkoutTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-              <div className="border-t border-gray-200 pt-2 flex justify-between text-sm">
-                <span className="text-gray-500">Duration</span>
-                <span className="font-bold text-gray-900">{formatDuration(checkoutSummary.minutes)}</span>
-              </div>
-            </div>
-            <button
-              onClick={() => setCheckoutSummary(null)}
-              className="w-full py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl text-sm transition-colors"
-            >
-              Done
-            </button>
           </div>
         </div>
       )}
