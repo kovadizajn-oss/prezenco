@@ -1,37 +1,5 @@
-import { LoginForm } from "@/components/login-form";
+import { redirect } from 'next/navigation'
 
-export default function LoginPage() {
-  return (
-    <main className="flex flex-1 items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col items-center gap-8">
-          {/* Logo */}
-          <div className="flex flex-col items-center gap-2">
-            <h1 className="text-3xl font-bold tracking-tight text-primary">
-              Prezenco
-            </h1>
-          </div>
-
-          {/* Login Card */}
-          <div className="w-full rounded-xl border border-border bg-white p-8 shadow-sm">
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-foreground">
-                Sign in to your account
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Enter your credentials below
-              </p>
-            </div>
-
-            <LoginForm />
-          </div>
-
-          {/* Footer text */}
-          <p className="text-center text-xs text-muted-foreground">
-            Accounts are created by invitation only.
-          </p>
-        </div>
-      </div>
-    </main>
-  );
+export default function RootPage() {
+  redirect('/login')
 }
