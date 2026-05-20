@@ -50,9 +50,7 @@ export default function LandingPage() {
             <div className="relative flex justify-center lg:justify-end items-end self-end">
               <div className="relative w-full max-w-md lg:max-w-lg">
                 {/* Phone mockup placeholder — replace src with real screenshot */}
-                <div className="w-64 h-[500px] mx-auto bg-white/10 rounded-3xl border-2 border-white/30 flex items-center justify-center">
-                  <p className="text-white/50 text-sm text-center px-4">Add your phone screenshot here</p>
-                </div>
+                <img src="/hero-phone.png" alt="Zummo app" className="w-full h-auto object-contain max-w-xs lg:max-w-sm mx-auto" />
               </div>
             </div>
           </div>
