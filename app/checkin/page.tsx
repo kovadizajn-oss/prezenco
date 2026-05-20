@@ -35,8 +35,39 @@ export default function CheckinPage() {
 
   useEffect(() => {
     loadData()
-    const interval = setInterval(loadData, 30000)
-    return () => clearInterval(interval)
+
+    let subscription: any
+
+    const setupSubscription = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: emp } = await supabase
+        .from('employees')
+        .select('id')
+        .eq('user_id', user.id)
+        .single()
+
+      if (!emp) return
+
+      subscription = supabase
+        .channel('time_logs_changes')
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'time_logs',
+          filter: `employee_id=eq.${emp.id}`,
+        }, () => {
+          loadData()
+        })
+        .subscribe()
+    }
+
+    setupSubscription()
+
+    return () => {
+      if (subscription) supabase.removeChannel(subscription)
+    }
   }, [])
 
   // Set default report date to today when modal opens
