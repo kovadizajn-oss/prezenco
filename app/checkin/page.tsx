@@ -57,8 +57,10 @@ export default function CheckinPage() {
           schema: 'public',
           table: 'time_logs',
           filter: `employee_id=eq.${emp.id}`,
-        }, () => {
-          loadData()
+        }, (payload: any) => {
+          if (payload.new?.type === 'checkout') {
+            loadData()
+          }
         })
         .subscribe()
     }
