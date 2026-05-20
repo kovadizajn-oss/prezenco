@@ -23,10 +23,14 @@ export default function ForgotPasswordPage() {
     })
 
     if (err) {
-      setError('Something went wrong. Please try again.')
-      setLoading(false)
-      return
-    }
+        if (err.message?.toLowerCase().includes('same password') || err.message?.toLowerCase().includes('different password')) {
+          setError('New password must be different from your current password.')
+        } else {
+          setError('Something went wrong. Please try again.')
+        }
+        setLoading(false)
+        return
+      }
 
     setSent(true)
     setLoading(false)
