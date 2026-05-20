@@ -106,9 +106,9 @@ export default function LandingPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { name: 'Starter', price: '€14.99', employees: '10 employees', popular: false },
-              { name: 'Growth', price: '€29.99', employees: '25 employees', popular: true },
-              { name: 'Business', price: '€49.99', employees: '100 employees', popular: false },
+              { name: 'Starter', price: '€14.99', employees: 'Up to 10 employees', popular: false },
+              { name: 'Growth', price: '€29.99', employees: 'Up to 25 employees', popular: true },
+              { name: 'Business', price: '€49.99', employees: 'Up to 100 employees', popular: false },
               { name: 'Enterprise', price: 'Custom', employees: 'Unlimited employees', popular: false },
             ].map((plan) => (
               <div
@@ -158,8 +158,7 @@ href={plan.price === 'Custom' ? 'mailto:contact@zummo.com' : '/login'}          
       {/* FOOTER */}
       <footer className="bg-white border-t border-zinc-200">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 w-full">            <div className="flex items-center gap-2">
               <div className="w-6 h-6 bg-[#22c55e] rounded-md flex items-center justify-center">
                 <svg width="12" height="15" viewBox="0 0 52 64" fill="none">
                   <rect x="4" y="2" width="44" height="6" rx="3" fill="white"/>
@@ -174,7 +173,9 @@ href={plan.price === 'Custom' ? 'mailto:contact@zummo.com' : '/login'}          
               <span className="font-bold text-zinc-900">Zummo</span>
             </div>
             <nav className="flex items-center gap-8">
-            <a href="/privacy" className="text-zinc-500 hover:text-zinc-900 transition-colors text-sm font-medium">Privacy Policy</a>
+            <div><a href="/privacy" className="text-zinc-500 hover:text-zinc-900 transition-colors text-sm font-medium">Privacy Policy</a>
+<div className="text-zinc-500 text-sm">© 2026 Zummo</div></div>
+
             </nav>
             <div className="text-zinc-500 text-sm">© 2026 Zummo</div>
           </div>
