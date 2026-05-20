@@ -51,7 +51,6 @@ export default function DashboardPage() {
   const [forceCheckout, setForceCheckout] = useState<ForceCheckout | null>(null)
   const [forceSaving, setForceSaving] = useState(false)
   const [forceError, setForceError] = useState('')
-  const [weekMinutes, setWeekMinutes] = useState(0)
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 60000)
@@ -139,34 +138,6 @@ export default function DashboardPage() {
       setCorrections(withNames)
     } else {
       setCorrections([])
-    }
-
-    // Get this week's logs for all employees
-    const weekStart = new Date()
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay())
-    weekStart.setHours(0, 0, 0, 0)
-
-    const { data: weekLogs } = await supabase
-      .from('time_logs')
-      .select('type, timestamp, employee_id')
-      .eq('business_id', business.id)
-      .gte('timestamp', weekStart.toISOString())
-      .order('timestamp', { ascending: true })
-
-    if (weekLogs) {
-      let totalWeek = 0
-      emps.forEach(emp => {
-        const empLogs = weekLogs.filter(l => l.employee_id === emp.id)
-        const checkins = empLogs.filter(l => l.type === 'checkin')
-        const checkouts = empLogs.filter(l => l.type === 'checkout')
-        checkins.forEach(ci => {
-          const co = checkouts.find(co => co.timestamp > ci.timestamp)
-          if (co) totalWeek += Math.floor(
-            (new Date(co.timestamp).getTime() - new Date(ci.timestamp).getTime()) / 60000
-          )
-        })
-      })
-      setWeekMinutes(totalWeek)
     }
 
     setLoading(false)
@@ -260,14 +231,6 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-8">
-
-      {/* Week stat */}
-      {(
-        <div className="bg-white border border-gray-200 rounded-2xl px-6 py-4 flex items-center justify-between">
-          <span className="text-sm text-gray-500">Your team worked this week</span>
-          <span className="text-lg font-bold text-gray-900">{formatDuration(weekMinutes)}</span>
-        </div>
-      )}
 
       {/* Live Now */}
       <section>
