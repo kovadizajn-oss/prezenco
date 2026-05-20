@@ -54,6 +54,8 @@ export default function CheckinPage() {
   }, [showReport])
 
   const loadData = async () => {
+    setIsCheckedIn(false)
+    setLastCheckin(null)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
