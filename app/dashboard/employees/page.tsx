@@ -25,6 +25,8 @@ export default function EmployeesPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [businessId, setBusinessId] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     loadEmployees()
@@ -120,6 +122,17 @@ export default function EmployeesPage() {
 
   const handleReactivate = async (id: string) => {
     await supabase.from('employees').update({ status: 'active' }).eq('id', id)
+    loadEmployees()
+  }
+  const handleDelete = async (emp: Employee) => {
+    setDeleting(true)
+    await fetch('/api/delete-employee', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ employeeId: emp.id }),
+    })
+    setConfirmDeleteId(null)
+    setDeleting(false)
     loadEmployees()
   }
 
@@ -242,12 +255,39 @@ export default function EmployeesPage() {
                     Deactivate
                   </button>
                 ) : (
-                  <button
-                    onClick={() => handleReactivate(emp.id)}
-                    className="text-xs text-gray-400 hover:text-green-500 transition-colors ml-2"
-                  >
-                    Reactivate
-                  </button>
+                  <div className="flex items-center gap-2 ml-2">
+                    <button
+                      onClick={() => handleReactivate(emp.id)}
+                      className="text-xs text-gray-400 hover:text-green-500 transition-colors"
+                    >
+                      Reactivate
+                    </button>
+                    {confirmDeleteId === emp.id ? (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-red-600">Sure?</span>
+                        <button
+                          onClick={() => handleDelete(emp)}
+                          disabled={deleting}
+                          className="text-xs text-white bg-red-500 hover:bg-red-600 px-2 py-0.5 rounded-lg disabled:opacity-50 transition-colors"
+                        >
+                          {deleting ? 'Deleting…' : 'Yes, delete'}
+                        </button>
+                        <button
+                          onClick={() => setConfirmDeleteId(null)}
+                          className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDeleteId(emp.id)}
+                        className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
