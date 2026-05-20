@@ -215,7 +215,7 @@ export default function DashboardPage() {
     new Date(dateStr).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
 
   const liveMinutes = (checkinIso: string) =>
-    Math.floor((now.getTime() - new Date(checkinIso).getTime()) / 60000)
+    Math.max(0, Math.floor((now.getTime() - new Date(checkinIso).getTime()) / 60000))
 
   const checkedIn = employees.filter(e => e.isCheckedIn)
   const longShiftFlags = employees.filter(e => e.isCheckedIn && e.checkinTime && liveMinutes(e.checkinTime) > 600)
