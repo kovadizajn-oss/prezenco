@@ -40,14 +40,10 @@ export default function ResetPasswordPage() {
     const { error: err } = await supabase.auth.updateUser({ password })
 
     if (err) {
-        if (err.message?.toLowerCase().includes('same password') || err.message?.toLowerCase().includes('different password')) {
-          setError('New password must be different from your current password.')
-        } else {
-          setError('Something went wrong. Please try again.')
-        }
-        setLoading(false)
-        return
-      }
+      setError('Something went wrong. Please try again.')
+      setLoading(false)
+      return
+    }
 
     setDone(true)
     setLoading(false)
