@@ -346,6 +346,7 @@ export default function CheckinPage() {
 
       {/* Big check in/out button */}
       {/* Hourglass check in/out button */}
+      {/* Hourglass check in/out button */}
       <style>{`
         @keyframes grain {
           0%   { top: 38px; opacity: 1; }
@@ -406,21 +407,15 @@ export default function CheckinPage() {
                 <div className="grain grain2" />
               </>
             )}
-            <svg
-              className={`hg-svg ${isCheckedIn ? 'flipped' : ''}`}
-              width="80"
-              height="80"
-              viewBox="0 0 100 120"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <rect x="10" y="4" width="80" height="10" rx="5" fill="white"/>
-              <rect x="10" y="106" width="80" height="10" rx="5" fill="white"/>
-              <path d="M20 14 C20 14 20 55 50 60 C80 65 80 106 80 106" stroke="white" strokeWidth="5" fill="none" strokeLinecap="round"/>
-              <path d="M80 14 C80 14 80 55 50 60 C20 65 20 106 20 106" stroke="white" strokeWidth="5" fill="none" strokeLinecap="round"/>
-              <path d="M22 100 Q50 82 78 100 L80 106 L20 106 Z" fill="white"/>
-              <ellipse cx="50" cy="100" rx="22" ry="7" fill="white"/>
-            </svg>
+            {isCheckedIn ? (
+              <svg className="hg-svg" width="72" height="72" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 18H9M14 6H10M20 3H19M19 3H5M19 3C19 5.51022 17.7877 7.86592 15.7451 9.32495L12 12M5 3H4M5 3C5 5.51022 6.21228 7.86592 8.25493 9.32495L12 12M20 21H19M19 21H5M19 21C19 18.4898 17.7877 16.1341 15.7451 14.675L12 12M5 21H4M5 21C5 18.4898 6.21228 16.1341 8.25493 14.675L12 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            ) : (
+              <svg className="hg-svg" width="72" height="72" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 18H9M20 3H19M19 3H5M19 3C19 5.51022 17.7877 7.86592 15.7451 9.32495L12 12M5 3H4M5 3C5 5.51022 6.21228 7.86592 8.25493 9.32495L12 12M20 21H19M19 21H5M19 21C19 18.4898 17.7877 16.1341 15.7451 14.675L12 12M5 21H4M5 21C5 18.4898 6.21228 16.1341 8.25493 14.675L12 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
             <span style={{
               fontSize: 11,
               fontWeight: 700,
