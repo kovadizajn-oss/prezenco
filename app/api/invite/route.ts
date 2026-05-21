@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
-    await resend.emails.send({
+    const resendResult = await resend.emails.send({
       from: 'Zummo <noreply@zummo.app>', 
       to: email,
       subject: `You've been invited to ${businessName} on Zummo`,
@@ -94,6 +94,7 @@ export async function POST(request: Request) {
         </html>
       `,
     })
+    console.log('Resend result:', JSON.stringify(resendResult))
 
     return NextResponse.json({ success: true })
   } catch (err) {
