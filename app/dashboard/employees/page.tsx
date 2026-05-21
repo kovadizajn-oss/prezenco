@@ -26,6 +26,7 @@ const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [businessId, setBusinessId] = useState<string | null>(null)
+  const [businessName, setBusinessName] = useState<string>('')
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
 
@@ -39,13 +40,14 @@ const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null
 
     const { data: business } = await supabase
       .from('businesses')
-      .select('id, subscription_status')
+      .select('id, name, subscription_status')
       .eq('owner_id', user.id)
       .single()
 
     if (!business) return
     setBusinessId(business.id)
     setSubscriptionStatus(business.subscription_status)
+    setBusinessName(business.name ?? '')
 
     const { data: emps } = await supabase
       .from('employees')
@@ -81,7 +83,7 @@ const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null
       const res = await fetch('/api/invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, employeeName: name, businessName }),
       })
 
       if (!res.ok) {
