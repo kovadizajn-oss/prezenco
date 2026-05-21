@@ -362,7 +362,7 @@ export default function CheckinPage() {
   return (
     <div className="h-screen bg-white flex flex-col items-center justify-center px-6 overflow-y-auto overscroll-none">
       {/* Header */}
-      <div className="text-center mb-10">
+      <div className="text-center mb-6">
         <h1 className="text-xl font-bold text-gray-900">{business?.name ?? 'Zummo'}</h1>
         <p className="text-gray-500 text-sm mt-1">{employee?.full_name ?? ''}</p>
       </div>
@@ -450,7 +450,7 @@ boxShadow: isCheckedIn ? '0 8px 32px rgba(239,68,68,0.45), 0 2px 8px rgba(239,68
       )}
 
       {/* Stats */}
-      <div className="mt-10 flex gap-6">
+      <div className="mt-6 flex gap-6">
         <div className="text-center">
           <p className="text-2xl font-bold text-gray-900">
             {isCheckedIn ? formatDuration(todayMinutes + liveMinutes) : formatDuration(todayMinutes)}
@@ -469,7 +469,7 @@ boxShadow: isCheckedIn ? '0 8px 32px rgba(239,68,68,0.45), 0 2px 8px rgba(239,68
       {/* Report an issue button */}
       <button
         onClick={() => setShowReport(true)}
-        className="mt-10 text-sm text-gray-400 hover:text-gray-600 underline underline-offset-2 transition-colors"
+        className="mt-6 text-sm text-gray-400 hover:text-gray-600 underline underline-offset-2 transition-colors"
       >
         Report an issue with my hours
       </button>
