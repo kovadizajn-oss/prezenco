@@ -484,7 +484,7 @@ const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null
           )}
 
           {/* Total */}
-          {!shiftsLoading && shifts.length > 0 && (
+          {!shiftsLoading && shifts.length > 0 && (subscriptionStatus === 'active' || subscriptionStatus === 'trialing') && (
             <div className="mb-4 text-sm text-gray-500">
               Total: <span className="font-semibold text-gray-900">{formatDuration(totalMinutes)}</span>
               {' '}across {shifts.length} shift{shifts.length !== 1 ? 's' : ''}
@@ -492,7 +492,7 @@ const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null
           )}
 
           {/* Shifts table */}
-          {shiftsLoading ? (
+          {(subscriptionStatus === 'active' || subscriptionStatus === 'trialing') && shiftsLoading ? (
             <div className="flex items-center justify-center h-32">
               <div className="w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
             </div>
