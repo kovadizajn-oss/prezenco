@@ -304,9 +304,6 @@ export default function SettingsPage() {
         <a href="/dashboard/upgrade" className="px-5 py-2.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-colors inline-block">
           {subscriptionStatus === 'active' ? 'Manage billing' : 'Upgrade plan'}
         </a>
-        <a>
-          {subscriptionStatus === 'active' ? 'Manage billing' : 'Upgrade plan'}
-        </a>
       </div>
 
       {/* Sign out */}
