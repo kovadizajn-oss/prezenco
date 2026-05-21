@@ -345,28 +345,96 @@ export default function CheckinPage() {
       </div>
 
       {/* Big check in/out button */}
+      {/* Hourglass check in/out button */}
+      <style>{`
+        @keyframes grain {
+          0%   { top: 38px; opacity: 1; }
+          85%  { opacity: 1; }
+          100% { top: 62px; opacity: 0; }
+        }
+        .grain {
+          position: absolute;
+          left: 50%;
+          margin-left: -1.5px;
+          width: 3px;
+          height: 3px;
+          border-radius: 50%;
+          background: rgba(255,255,255,0.95);
+          animation: grain 1.1s linear infinite;
+          z-index: 2;
+          pointer-events: none;
+        }
+        .grain2 { animation-delay: 0.55s; }
+        .hg-svg {
+          transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .hg-svg.flipped {
+          transform: rotate(180deg);
+        }
+      `}</style>
+
       <button
         onClick={isCheckedIn ? () => setShowConfirm(true) : handleCheckin}
         disabled={actionLoading}
-        className={`w-48 h-48 rounded-full text-white font-bold text-xl shadow-lg transition-all active:scale-95 disabled:opacity-60 ${
-          isCheckedIn
-            ? 'bg-red-500 hover:bg-red-600 shadow-red-200'
-            : 'bg-green-500 hover:bg-green-600 shadow-green-200'
-        }`}
+        className="transition-all active:scale-95 disabled:opacity-60"
+        style={{
+          width: 160,
+          height: 160,
+          borderRadius: '50%',
+          background: isCheckedIn ? '#ef4444' : '#22c55e',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+          cursor: 'pointer',
+          position: 'relative',
+          overflow: 'hidden',
+          border: 'none',
+          transition: 'background 0.3s',
+        }}
       >
         {actionLoading ? (
           <div className="flex items-center justify-center">
-            <div className="w-8 h-8 border-3 border-white border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : isCheckedIn ? (
-          'Check Out'
         ) : (
-          'Check In'
+          <>
+            {isCheckedIn && (
+              <>
+                <div className="grain" />
+                <div className="grain grain2" />
+              </>
+            )}
+            <svg
+              className={`hg-svg ${isCheckedIn ? 'flipped' : ''}`}
+              width="80"
+              height="80"
+              viewBox="0 0 100 120"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect x="10" y="4" width="80" height="10" rx="5" fill="white"/>
+              <rect x="10" y="106" width="80" height="10" rx="5" fill="white"/>
+              <path d="M20 14 C20 14 20 55 50 60 C80 65 80 106 80 106" stroke="white" strokeWidth="5" fill="none" strokeLinecap="round"/>
+              <path d="M80 14 C80 14 80 55 50 60 C20 65 20 106 20 106" stroke="white" strokeWidth="5" fill="none" strokeLinecap="round"/>
+              <path d="M22 100 Q50 82 78 100 L80 106 L20 106 Z" fill="white"/>
+              <ellipse cx="50" cy="100" rx="22" ry="7" fill="white"/>
+            </svg>
+            <span style={{
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: '0.09em',
+              color: '#fff',
+            }}>
+              {isCheckedIn ? 'CHECK OUT' : 'CHECK IN'}
+            </span>
+          </>
         )}
       </button>
 
       {isCheckedIn && lastCheckin && (
-        <p className="mt-4 text-green-600 font-medium text-sm">
+        <p className="mt-4 text-red-500 font-medium text-sm">
           Checked in · {formatDuration(liveMinutes)} so far
         </p>
       )}
