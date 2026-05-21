@@ -99,6 +99,46 @@ export default function CheckinPage() {
       .single()
 
     if (emp?.status === 'inactive') {
+      const { data: openShift } = await supabase
+        .from('time_logs')
+        .select('id')
+        .eq('employee_id', emp.id)
+        .eq('type', 'checkin')
+        .order('timestamp', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (openShift) {
+        const lastCheckout = await supabase
+          .from('time_logs')
+          .select('id')
+          .eq('employee_id', emp.id)
+          .eq('type', 'checkout')
+          .order('timestamp', { ascending: false })
+          .limit(1)
+          .single()
+
+        if (!lastCheckout.data) {
+          await supabase.from('time_logs').insert({
+            employee_id: emp.id,
+            business_id: emp.business_id,
+            type: 'checkout',
+            lat: 0,
+            lng: 0,
+            within_radius: false,
+            manually_adjusted: true,
+            adjusted_by: 'System',
+            adjustment_reason: 'Employee deactivated while checked in',
+          })
+        }
+      }
+
+      await supabase.auth.signOut()
+      window.location.href = '/login'
+      return
+    }
+
+    if (emp?.status === 'inactive') {
       await supabase.auth.signOut()
       window.location.href = '/login'
       return
