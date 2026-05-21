@@ -25,11 +25,20 @@ export async function POST(request: NextRequest) {
     const customerId = session.customer as string
     const subscriptionId = session.subscription as string
 
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+    const priceId = subscription.items.data[0]?.price.id
+
+    const planName =
+      priceId === process.env.STRIPE_STARTER_PRICE_ID ? 'Starter' :
+      priceId === process.env.STRIPE_GROWTH_PRICE_ID ? 'Growth' :
+      priceId === process.env.STRIPE_BUSINESS_PRICE_ID ? 'Business' : 'Unknown'
+
     await supabase
       .from('businesses')
       .update({
         subscription_status: 'active',
         stripe_subscription_id: subscriptionId,
+        plan_name: planName,
       })
       .eq('stripe_customer_id', customerId)
   }
