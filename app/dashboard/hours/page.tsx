@@ -492,7 +492,7 @@ const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null
           )}
 
           {/* Shifts table */}
-          {(subscriptionStatus === 'active' || subscriptionStatus === 'trialing') && shiftsLoading ? (
+          {(subscriptionStatus === 'active' || subscriptionStatus === 'trialing') && (shiftsLoading ? (
             <div className="flex items-center justify-center h-32">
               <div className="w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
             </div>
@@ -548,9 +548,9 @@ const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null
                 </div>
               ))}
             </div>
-          )}
-        </>
-      )}
+          ))}
+          </>
+        )}
 
       {/* Edit / Add checkout Modal */}
       {editing && (
