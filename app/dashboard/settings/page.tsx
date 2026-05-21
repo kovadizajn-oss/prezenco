@@ -158,7 +158,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-6 overflow-x-hidden">
+    <div className="p-4 w-full max-w-2xl mx-auto space-y-6">
       <h1 className="text-xl font-semibold text-gray-900">Settings</h1>
 
       {/* Business settings */}
