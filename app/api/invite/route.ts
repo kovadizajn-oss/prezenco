@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     }
 
     await resend.emails.send({
-      from: 'Zummo <noreply@zummo.app>',
+      from: 'Zummo <onboarding@resend.dev>', 
       to: email,
       subject: `You've been invited to ${businessName} on Zummo`,
       html: `
