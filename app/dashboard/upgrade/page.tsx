@@ -93,7 +93,7 @@ export default function UpgradePage() {
       <div className="grid sm:grid-cols-3 gap-6" style={{ opacity: planLoading ? 0 : 1, transition: 'opacity 0.15s' }}>
         {plans.map((plan) => {
           const isCurrent = isActive && currentPlan === plan.name
-        const isPopular = !isActive && plan.name === 'Growth'
+          const isPopular = (!isActive || subscriptionStatus === 'trialing') && plan.name === 'Growth' && !isCurrent
           return (
             <div
               key={plan.name}
