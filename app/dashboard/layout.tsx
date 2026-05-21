@@ -55,15 +55,6 @@ const navItems = [
       </svg>
     ),
   },
-  {
-    label: 'Upgrade',
-    href: '/dashboard/upgrade',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l14 0M5 3l4 18M5 3l6 6 6-6M19 3l-4 18" />
-      </svg>
-    ),
-  },
 ]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -127,8 +118,17 @@ useEffect(() => {
           })}
         </nav>
 
-        {/* Sign out */}
-        <div className="px-3 py-4 border-t border-gray-100">
+        {/* Upgrade + Sign out */}
+        <div className="px-3 py-4 border-t border-gray-100 space-y-1">
+          <Link
+            href="/dashboard/upgrade"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-green-500 hover:bg-green-600 text-white transition-colors w-full"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Upgrade
+          </Link>
           <SignOutButton />
         </div>
       </aside>
