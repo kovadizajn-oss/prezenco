@@ -17,6 +17,7 @@ export default function SignupStep1Page() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+const [consent, setConsent] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -24,6 +25,10 @@ export default function SignupStep1Page() {
 
     if (password.length < 8) {
       setError('Password must be at least 8 characters.')
+      return
+    }
+    if (!consent) {
+      setError('Please agree to the Privacy Policy to continue.')
       return
     }
 
@@ -149,6 +154,19 @@ export default function SignupStep1Page() {
               {error}
             </div>
           )}
+
+<div className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              id="consent"
+              checked={consent}
+              onChange={e => setConsent(e.target.checked)}
+              className="mt-0.5 accent-green-500"
+            />
+            <label htmlFor="consent" className="text-sm text-gray-600">
+              I agree to the <a href="/privacy" target="_blank" className="text-green-600 hover:underline">Privacy Policy</a> and consent to Zummo processing my business data.
+            </label>
+          </div>
 
           <button
             type="submit"
