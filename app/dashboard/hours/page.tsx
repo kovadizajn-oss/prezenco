@@ -54,6 +54,7 @@ export default function HoursPage() {
   const [ownerName, setOwnerName] = useState('')
   const [businessId, setBusinessId] = useState('')
   const [selectedEmpIsCheckedIn, setSelectedEmpIsCheckedIn] = useState(false)
+const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null)
 
   // Edit modal state
   const [editing, setEditing] = useState<EditingShift | null>(null)
@@ -79,7 +80,7 @@ export default function HoursPage() {
 
     const { data: business } = await supabase
       .from('businesses')
-      .select('id, owner_name')
+      .select('id, owner_name, subscription_status')
       .eq('owner_id', user.id)
       .single()
 
@@ -87,6 +88,7 @@ export default function HoursPage() {
 
     setOwnerName(business.owner_name ?? '')
     setBusinessId(business.id)
+    setSubscriptionStatus(business.subscription_status)
 
     const { data: emps } = await supabase
       .from('employees')
@@ -470,6 +472,16 @@ export default function HoursPage() {
               </button>
             )}
           </div>
+
+
+
+          {/* Subscription gate */}
+          {subscriptionStatus !== 'active' && subscriptionStatus !== 'trialing' && (
+            <div className="mb-4 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex items-center justify-between">
+              <p className="text-sm text-amber-700 font-medium">Upgrade your plan to view hours.</p>
+              <a href="/dashboard/upgrade" className="text-sm font-semibold text-white bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg transition-colors">Upgrade</a>
+            </div>
+          )}
 
           {/* Total */}
           {!shiftsLoading && shifts.length > 0 && (
