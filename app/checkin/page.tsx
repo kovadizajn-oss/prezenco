@@ -437,11 +437,9 @@ boxShadow: isCheckedIn ? '0 8px 32px rgba(239,68,68,0.45), 0 2px 8px rgba(239,68
         )}
       </button>
 
-      {isCheckedIn && lastCheckin && (
-        <p className="mt-4 text-red-500 font-medium text-sm">
-          Checked in · {formatDuration(liveMinutes)} so far
-        </p>
-      )}
+      <p className="mt-4 text-red-500 font-medium text-sm" style={{ visibility: isCheckedIn && lastCheckin ? 'visible' : 'hidden' }}>
+        Checked in · {formatDuration(liveMinutes)} so far
+      </p>
 
       {error && (
         <div className="mt-6 bg-red-50 border border-red-200 rounded-2xl px-5 py-4 text-sm text-red-700 max-w-sm text-center">
