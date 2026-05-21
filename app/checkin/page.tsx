@@ -115,7 +115,7 @@ export default function CheckinPage() {
             lat: 0,
             lng: 0,
             within_radius: false,
-            manually_adjusted: true,
+            manually_adjusted: false,
             adjusted_by: 'System',
             adjustment_reason: 'Employee deactivated while checked in',
           })

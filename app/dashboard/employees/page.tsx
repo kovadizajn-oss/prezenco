@@ -147,9 +147,9 @@ setPlanName(business.plan_name)
         lat: 0,
         lng: 0,
         within_radius: false,
-        manually_adjusted: true,
-        adjusted_by: 'System',
-        adjustment_reason: 'Employee deactivated by owner',
+        manually_adjusted: false,
+          adjusted_by: 'System',
+          adjustment_reason: 'Employee deactivated by owner',
       })
     }
 
