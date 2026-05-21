@@ -49,6 +49,16 @@ export default function UpgradePage() {
     load()
   }, [])
 
+  async function handlePortal() {
+    try {
+      const res = await fetch('/api/stripe/portal', { method: 'POST' })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   async function handleSubscribe(priceId: string, planName: string) {
     setLoading(planName)
     try {
@@ -106,7 +116,7 @@ export default function UpgradePage() {
                 {plan.employees}
               </p>
               <button
-                onClick={() => handleSubscribe(plan.priceId!, plan.name)}
+                onClick={() => isCurrent ? null : isActive ? handlePortal() : handleSubscribe(plan.priceId!, plan.name)}
                 disabled={loading === plan.name || isCurrent}
                 className={`mt-auto w-full py-3 rounded-lg font-semibold transition-colors ${
                   isCurrent
@@ -114,7 +124,7 @@ export default function UpgradePage() {
                     : 'bg-gray-900 text-white hover:bg-gray-800'
                 } disabled:opacity-60`}
               >
-                {isCurrent ? 'Active' : loading === plan.name ? 'Loading...' : 'Get started'}
+                {isCurrent ? 'Active' : loading === plan.name ? 'Loading...' : isActive ? 'Switch to this plan' : 'Get started'}
               </button>
             </div>
           )
