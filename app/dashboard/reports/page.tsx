@@ -48,6 +48,7 @@ export default function ReportsPage() {
       .select('id, full_name, email')
       .eq('business_id', business.id)
       .eq('status', 'active')
+        .eq('invite_accepted', true)
       .order('full_name')
 
     setEmployees(emps ?? [])
