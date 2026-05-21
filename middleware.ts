@@ -35,6 +35,26 @@ export async function middleware(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
+  // Auto-expire trials
+  if (user) {
+    const { data: business } = await supabase
+      .from('businesses')
+      .select('subscription_status, trial_ends_at')
+      .eq('owner_id', user.sub)
+      .single()
+
+    if (
+      business?.subscription_status === 'trialing' &&
+      business?.trial_ends_at &&
+      new Date(business.trial_ends_at) < new Date()
+    ) {
+      await supabase
+        .from('businesses')
+        .update({ subscription_status: 'expired' })
+        .eq('owner_id', user.sub)
+    }
+  }
+
   if (user && (request.nextUrl.pathname.startsWith("/login") || request.nextUrl.pathname === "/")) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
