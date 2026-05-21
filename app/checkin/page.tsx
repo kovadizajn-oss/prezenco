@@ -348,9 +348,9 @@ export default function CheckinPage() {
       {/* Hourglass check in/out button */}
       <style>{`
         @keyframes grain {
-          0%   { top: 38px; opacity: 1; }
+          0%   { top: 34px; opacity: 1; }
           85%  { opacity: 1; }
-          100% { top: 62px; opacity: 0; }
+          100% { top: 56px; opacity: 0; }
         }
         .grain {
           position: absolute;
@@ -362,20 +362,8 @@ export default function CheckinPage() {
           background: rgba(255,255,255,0.95);
           animation: grain 1.1s linear infinite;
           z-index: 2;
-          pointer-events: none;
         }
         .grain2 { animation-delay: 0.55s; }
-        .hg-img {
-          transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s;
-        }
-        .hg-img.checked-in {
-          transform: rotate(180deg);
-          filter: brightness(0) invert(1);
-        }
-        .hg-img.checked-out {
-          transform: rotate(0deg);
-          filter: none;
-        }
       `}</style>
 
       <button
@@ -396,7 +384,6 @@ export default function CheckinPage() {
           cursor: 'pointer',
           position: 'relative',
           overflow: 'hidden',
-          transition: 'background 0.3s, border 0.3s',
         }}
       >
         {actionLoading ? (
@@ -411,18 +398,42 @@ export default function CheckinPage() {
                 <div className="grain grain2" />
               </>
             )}
-            <img
-              src="/hourglass.png"
-              alt="hourglass"
-              className={`hg-img ${isCheckedIn ? 'checked-in' : 'checked-out'}`}
-              style={{ width: 72, height: 72, objectFit: 'contain' }}
-            />
+            <div style={{ position: 'relative', width: 52, height: 64 }}>
+              <svg width="52" height="64" viewBox="0 0 52 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4" y="2" width="44" height="6" rx="3" fill={isCheckedIn ? 'white' : '#22c55e'} />
+                <rect x="4" y="56" width="44" height="6" rx="3" fill={isCheckedIn ? 'white' : '#22c55e'} />
+                <line x1="8" y1="8" x2="26" y2="32" stroke={isCheckedIn ? 'white' : '#22c55e'} strokeWidth="2" strokeLinecap="round" />
+                <line x1="44" y1="8" x2="26" y2="32" stroke={isCheckedIn ? 'white' : '#22c55e'} strokeWidth="2" strokeLinecap="round" />
+                <line x1="8" y1="56" x2="26" y2="32" stroke={isCheckedIn ? 'white' : '#22c55e'} strokeWidth="2" strokeLinecap="round" />
+                <line x1="44" y1="56" x2="26" y2="32" stroke={isCheckedIn ? 'white' : '#22c55e'} strokeWidth="2" strokeLinecap="round" />
+                {isCheckedIn ? (
+                  <>
+                    <polygon points="26,30 9,7 43,7"  fill="white" opacity="0.12" />
+                    <polygon points="26,30 11,7 41,7" fill="white" opacity="0.18" />
+                    <polygon points="26,30 13,7 39,7" fill="white" opacity="0.25" />
+                    <polygon points="26,30 16,7 36,7" fill="white" opacity="0.35" />
+                    <polygon points="26,30 18,7 34,7" fill="white" opacity="0.55" />
+                    <polygon points="26,30 20,7 32,7" fill="white" opacity="0.75" />
+                    <polygon points="26,29 22,7 30,7" fill="white" />
+                  </>
+                ) : (
+                  <>
+                    <polygon points="26,34 9,57 43,57"  fill="#22c55e" opacity="0.12" />
+                    <polygon points="26,34 11,57 41,57" fill="#22c55e" opacity="0.18" />
+                    <polygon points="26,34 13,57 39,57" fill="#22c55e" opacity="0.25" />
+                    <polygon points="26,34 16,57 36,57" fill="#22c55e" opacity="0.35" />
+                    <polygon points="26,34 18,57 34,57" fill="#22c55e" opacity="0.55" />
+                    <polygon points="26,34 20,57 32,57" fill="#22c55e" opacity="0.75" />
+                    <polygon points="26,35 22,57 30,57" fill="#22c55e" />
+                  </>
+                )}
+              </svg>
+            </div>
             <span style={{
               fontSize: 11,
               fontWeight: 700,
               letterSpacing: '0.09em',
               color: isCheckedIn ? '#fff' : '#22c55e',
-              transition: 'color 0.3s',
             }}>
               {isCheckedIn ? 'CHECK OUT' : 'CHECK IN'}
             </span>
