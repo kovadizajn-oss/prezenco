@@ -249,7 +249,7 @@ export default function SettingsPage() {
             <div className="flex-1 h-px bg-gray-200" />
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <input
               type="text"
               value={locationAddress}
