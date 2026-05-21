@@ -360,7 +360,7 @@ export default function CheckinPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 py-6">
+    <div className="bg-white flex flex-col items-center justify-center px-6 py-6 min-h-dvh">
       {/* Header */}
       <div className="text-center mb-6">
         <h1 className="text-xl font-bold text-gray-900">{business?.name ?? 'Zummo'}</h1>
