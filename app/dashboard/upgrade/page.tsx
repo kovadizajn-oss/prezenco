@@ -31,6 +31,7 @@ export default function UpgradePage() {
   const [loading, setLoading] = useState<string | null>(null)
   const [currentPlan, setCurrentPlan] = useState<string | null>(null)
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null)
+  const [planLoading, setPlanLoading] = useState(true)
 
   useEffect(() => {
     const load = async () => {
@@ -45,6 +46,7 @@ export default function UpgradePage() {
         setCurrentPlan(business.plan_name)
         setSubscriptionStatus(business.subscription_status)
       }
+      setPlanLoading(false)
     }
     load()
   }, [])
@@ -88,7 +90,7 @@ export default function UpgradePage() {
         </p>
       </div>
 
-      <div className="grid sm:grid-cols-3 gap-6">
+      <div className="grid sm:grid-cols-3 gap-6" style={{ opacity: planLoading ? 0 : 1, transition: 'opacity 0.15s' }}>
         {plans.map((plan) => {
           const isCurrent = isActive && currentPlan === plan.name
         const isPopular = !isActive && plan.name === 'Growth'
