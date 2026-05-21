@@ -349,9 +349,9 @@ export default function CheckinPage() {
       {/* Hourglass check in/out button */}
       <style>{`
         @keyframes grain {
-          0%   { top: 38px; opacity: 1; }
+          0%   { top: 72px; opacity: 1; }
           85%  { opacity: 1; }
-          100% { top: 62px; opacity: 0; }
+          100% { top: 100px; opacity: 0; }
         }
         .grain {
           position: absolute;
