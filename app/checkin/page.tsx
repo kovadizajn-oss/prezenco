@@ -98,6 +98,12 @@ export default function CheckinPage() {
       .eq('user_id', user.id)
       .single()
 
+    if (emp?.status === 'inactive') {
+      await supabase.auth.signOut()
+      window.location.href = '/login'
+      return
+    }
+
     if (!emp) return
     setEmployee(emp)
 
