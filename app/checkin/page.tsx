@@ -349,9 +349,16 @@ export default function CheckinPage() {
       {/* Hourglass check in/out button */}
       <style>{`
         @keyframes grain {
-          0%   { top: 72px; opacity: 1; }
-          85%  { opacity: 1; }
-          100% { top: 100px; opacity: 0; }
+          0%   { top: 75px; opacity: 0; }
+          10%  { opacity: 1; }
+          90%  { opacity: 1; }
+          100% { top: 95px; opacity: 0; }
+        }
+        @keyframes grain2 {
+          0%   { top: 75px; opacity: 0; }
+          10%  { opacity: 1; }
+          90%  { opacity: 1; }
+          100% { top: 95px; opacity: 0; }
         }
         .grain {
           position: absolute;
@@ -365,7 +372,7 @@ export default function CheckinPage() {
           z-index: 2;
           pointer-events: none;
         }
-        .grain2 { animation-delay: 0.55s; }
+        .grain2 .grain2 { animation-delay: 1.1s; animation-name: grain2; }
         .hg-svg {
           transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
