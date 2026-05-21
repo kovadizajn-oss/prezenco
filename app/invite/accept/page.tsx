@@ -14,6 +14,7 @@ export default function AcceptInvitePage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [ready, setReady] = useState(false)
+  const [consent, setConsent] = useState(false)
 
   useEffect(() => {
     // Supabase invite links use a hash fragment with access_token
@@ -55,6 +56,10 @@ export default function AcceptInvitePage() {
     }
     if (password !== confirm) {
       setError('Passwords do not match.')
+      return
+    }
+    if (!consent) {
+      setError('Please agree to the Privacy Policy to continue.')
       return
     }
 
@@ -143,6 +148,19 @@ export default function AcceptInvitePage() {
                 {error}
               </div>
             )}
+
+<div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="consent"
+                checked={consent}
+                onChange={e => setConsent(e.target.checked)}
+                className="mt-0.5 accent-green-500"
+              />
+              <label htmlFor="consent" className="text-sm text-gray-600">
+                I agree to the <a href="/privacy" target="_blank" className="text-green-600 hover:underline">Privacy Policy</a> and consent to my employer tracking my work hours and location for attendance purposes.
+              </label>
+            </div>
 
             <button
               type="submit"
