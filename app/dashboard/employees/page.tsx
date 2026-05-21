@@ -134,7 +134,7 @@ setPlanName(business.plan_name)
 
     const { data: logs } = await supabase
       .from('time_logs')
-      .select('id, type')
+      .select('id, type, business_id')
       .eq('employee_id', id)
       .order('timestamp', { ascending: false })
       .limit(1)
@@ -142,7 +142,7 @@ setPlanName(business.plan_name)
     if (logs?.[0]?.type === 'checkin') {
       await supabase.from('time_logs').insert({
         employee_id: id,
-        business_id: businessId,
+        business_id: logs[0].business_id,
         type: 'checkout',
         lat: 0,
         lng: 0,
