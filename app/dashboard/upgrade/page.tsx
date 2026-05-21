@@ -9,7 +9,7 @@ const plans = [
   {
     name: 'Starter',
     price: '€14.99',
-    employees: 'Up to 10 employees',
+    employees: 'Up to 3 employees',
     priceId: process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID,
   },
   {

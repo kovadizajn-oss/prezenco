@@ -104,7 +104,7 @@ export default function LandingPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { name: 'Starter', price: '€14.99', employees: 'Up to 10 employees', popular: false },
+              { name: 'Starter', price: '€14.99', employees: 'Up to 3 employees', popular: false },
               { name: 'Growth', price: '€29.99', employees: 'Up to 25 employees', popular: true },
               { name: 'Business', price: '€49.99', employees: 'Up to 100 employees', popular: false },
               { name: 'Enterprise', price: 'Custom', employees: 'Unlimited employees', popular: false },
