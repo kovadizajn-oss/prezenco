@@ -91,11 +91,12 @@ export default function UpgradePage() {
       <div className="grid sm:grid-cols-3 gap-6">
         {plans.map((plan) => {
           const isCurrent = isActive && currentPlan === plan.name
+        const isPopular = !isActive && plan.name === 'Growth'
           return (
             <div
               key={plan.name}
               className={`rounded-2xl p-8 flex flex-col relative ${
-                isCurrent
+                isCurrent || isPopular
                   ? 'bg-green-500 text-white ring-4 ring-green-500/20'
                   : 'bg-white border border-gray-200'
               }`}
@@ -103,6 +104,11 @@ export default function UpgradePage() {
               {isCurrent && (
                 <span className="text-xs font-semibold bg-white text-green-500 px-3 py-1 rounded-full self-start mb-4">
                   Current plan
+                </span>
+              )}
+              {isPopular && (
+                <span className="text-xs font-semibold bg-white text-green-500 px-3 py-1 rounded-full self-start mb-4">
+                  Most popular
                 </span>
               )}
               <h2 className={`text-lg font-semibold mb-2 ${isCurrent ? 'text-white' : 'text-gray-900'}`}>
