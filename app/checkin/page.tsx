@@ -29,7 +29,7 @@ export default function CheckinPage() {
   const [reportSuccess, setReportSuccess] = useState(false)
 
   useEffect(() => {
-    const interval = setInterval(() => setNow(new Date()), 60000)
+    const interval = setInterval(() => setNow(new Date()), 5000)
     return () => clearInterval(interval)
   }, [])
 
