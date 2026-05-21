@@ -111,18 +111,18 @@ export default function UpgradePage() {
                   Most popular
                 </span>
               )}
-              <h2 className={`text-lg font-semibold mb-2 ${isCurrent ? 'text-white' : 'text-gray-900'}`}>
+              <h2 className={`text-lg font-semibold mb-2 ${isCurrent || isPopular ? 'text-white' : 'text-gray-900'}`}>
                 {plan.name}
               </h2>
-              <div className={`text-4xl font-bold mb-1 ${isCurrent ? 'text-white' : 'text-gray-900'}`}>
+              <div className={`text-4xl font-bold mb-1 ${isCurrent || isPopular ? 'text-white' : 'text-gray-900'}`}>
                 {plan.price}
-                <span className={`text-base font-normal ml-1 ${isCurrent ? 'text-white/80' : 'text-gray-500'}`}>/mo</span>
+                <span className={`text-base font-normal ml-1 ${isCurrent || isPopular ? 'text-white/80' : 'text-gray-500'}`}>/mo</span>
               </div>
-              <p className={`text-sm mb-8 ${isCurrent ? 'text-white/90' : 'text-gray-500'}`}>
+              <p className={`text-sm mb-8 ${isCurrent || isPopular ? 'text-white/90' : 'text-gray-500'}`}>
                 {plan.employees}
               </p>
               <button
-                onClick={() => isCurrent ? null : isActive ? handlePortal() : handleSubscribe(plan.priceId!, plan.name)}
+                onClick={() => isCurrent || isPopular ? null : isActive ? handlePortal() : handleSubscribe(plan.priceId!, plan.name)}
                 disabled={loading === plan.name || isCurrent}
                 className={`mt-auto w-full py-3 rounded-lg font-semibold transition-colors ${
                   isCurrent
@@ -130,7 +130,7 @@ export default function UpgradePage() {
                     : 'bg-gray-900 text-white hover:bg-gray-800'
                 } disabled:opacity-60`}
               >
-                {isCurrent ? 'Active' : loading === plan.name ? 'Loading...' : isActive ? 'Switch to this plan' : 'Get started'}
+                {isCurrent || isPopular ? 'Active' : loading === plan.name ? 'Loading...' : isActive ? 'Switch to this plan' : 'Get started'}
               </button>
             </div>
           )
