@@ -15,10 +15,19 @@ type Employee = {
 }
 
 export default function EmployeesPage() {
+  function getPlanLimit(status: string | null, planName: string | null): number {
+    if (status === 'trialing') return 25
+    if (status !== 'active') return 0
+    if (planName === 'Starter') return 3
+    if (planName === 'Growth') return 25
+    if (planName === 'Business') return 100
+    return 0
+  }
   const supabase = createClient()
 const [employees, setEmployees] = useState<Employee[]>([])
 const [loading, setLoading] = useState(true)
 const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null)
+const [planName, setPlanName] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -40,13 +49,14 @@ const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null
 
     const { data: business } = await supabase
       .from('businesses')
-      .select('id, name, subscription_status')
+      .select('id, name, subscription_status, plan_name')
       .eq('owner_id', user.id)
       .single()
 
     if (!business) return
     setBusinessId(business.id)
     setSubscriptionStatus(business.subscription_status)
+setPlanName(business.plan_name)
     setBusinessName(business.name ?? '')
 
     const { data: emps } = await supabase
@@ -152,21 +162,41 @@ const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold text-gray-900">Employees</h1>
-        {subscriptionStatus === 'active' || subscriptionStatus === 'trialing' ? (
-          <button
-            onClick={() => { setShowForm(true); setError(''); setSuccess('') }}
-            className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-colors"
-          >
-            + Add Employee
-          </button>
-        ) : (
-          <a
-            href="/dashboard/upgrade"
-            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-semibold rounded-xl transition-colors"
-          >
-            + Add Employee
-          </a>
-        )}
+        {(() => {
+            const limit = getPlanLimit(subscriptionStatus, planName)
+            const activeCount = employees.filter(e => e.status === 'active').length
+            const atLimit = activeCount >= limit
+
+            if (subscriptionStatus !== 'active' && subscriptionStatus !== 'trialing') {
+              return (
+                <a href="/dashboard/upgrade" className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-semibold rounded-xl transition-colors">
+                  + Add Employee
+                </a>
+              )
+            }
+
+            if (atLimit) {
+              return (
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-amber-600 font-medium">
+                    Employee limit reached ({activeCount}/{limit})
+                  </span>
+                  <a href="/dashboard/upgrade" className="px-4 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 text-sm font-semibold rounded-xl transition-colors border border-amber-200">
+                    Upgrade
+                  </a>
+                </div>
+              )
+            }
+
+            return (
+              <button
+                onClick={() => { setShowForm(true); setError(''); setSuccess('') }}
+                className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-colors"
+              >
+                + Add Employee ({activeCount}/{limit})
+              </button>
+            )
+          })()}
       </div>
 
       {success && (
