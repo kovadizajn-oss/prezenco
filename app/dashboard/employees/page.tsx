@@ -16,8 +16,9 @@ type Employee = {
 
 export default function EmployeesPage() {
   const supabase = createClient()
-  const [employees, setEmployees] = useState<Employee[]>([])
-  const [loading, setLoading] = useState(true)
+const [employees, setEmployees] = useState<Employee[]>([])
+const [loading, setLoading] = useState(true)
+const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -38,12 +39,13 @@ export default function EmployeesPage() {
 
     const { data: business } = await supabase
       .from('businesses')
-      .select('id')
+      .select('id, subscription_status')
       .eq('owner_id', user.id)
       .single()
 
     if (!business) return
     setBusinessId(business.id)
+    setSubscriptionStatus(business.subscription_status)
 
     const { data: emps } = await supabase
       .from('employees')
@@ -148,12 +150,21 @@ export default function EmployeesPage() {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold text-gray-900">Employees</h1>
-        <button
-          onClick={() => { setShowForm(true); setError(''); setSuccess('') }}
-          className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-colors"
-        >
-          + Add Employee
-        </button>
+        {subscriptionStatus === 'active' || subscriptionStatus === 'trialing' ? (
+          <button
+            onClick={() => { setShowForm(true); setError(''); setSuccess('') }}
+            className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-colors"
+          >
+            + Add Employee
+          </button>
+        ) : (
+          <a
+            href="/dashboard/upgrade"
+            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-semibold rounded-xl transition-colors"
+          >
+            + Add Employee
+          </a>
+        )}
       </div>
 
       {success && (

@@ -18,6 +18,7 @@ export default function ReportsPage() {
   const [generating, setGenerating] = useState(false)
   const [businessId, setBusinessId] = useState<string | null>(null)
   const [businessName, setBusinessName] = useState('')
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null)
 
   const now = new Date()
   const [month, setMonth] = useState(now.getMonth())
@@ -33,13 +34,14 @@ export default function ReportsPage() {
 
     const { data: business } = await supabase
       .from('businesses')
-      .select('id, name')
+      .select('id, name, subscription_status')
       .eq('owner_id', user.id)
       .single()
 
     if (!business) return
     setBusinessId(business.id)
     setBusinessName(business.name)
+    setSubscriptionStatus(business.subscription_status)
 
     const { data: emps } = await supabase
       .from('employees')
@@ -176,16 +178,28 @@ export default function ReportsPage() {
           </ul>
         </div>
 
-        <button
-          onClick={handleExport}
-          disabled={generating || employees.length === 0}
-          className="w-full py-3 px-4 bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white font-semibold rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          {generating ? 'Generating…' : `Download ${monthName} report`}
-        </button>
+        {subscriptionStatus === 'active' || subscriptionStatus === 'trialing' ? (
+          <button
+            onClick={handleExport}
+            disabled={generating || employees.length === 0}
+            className="w-full py-3 px-4 bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white font-semibold rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            {generating ? 'Generating…' : `Download ${monthName} report`}
+          </button>
+        ) : (
+          <a
+            href="/dashboard/upgrade"
+            className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Upgrade to download reports
+          </a>
+        )}
 
         {employees.length === 0 && (
           <p className="text-center text-sm text-gray-400 mt-3">Add employees first to generate a report.</p>
