@@ -15,6 +15,7 @@ export default function SettingsPage() {
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
   const [businessId, setBusinessId] = useState<string | null>(null)
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null)
 
   // Location state
   const [lat, setLat] = useState<number | null>(null)
@@ -35,12 +36,13 @@ export default function SettingsPage() {
 
     const { data: business } = await supabase
       .from('businesses')
-      .select('id, name, owner_name, checkin_radius_metres, workplace_lat, workplace_lng')
+      .select('id, name, owner_name, checkin_radius_metres, workplace_lat, workplace_lng, subscription_status')
       .eq('owner_id', user.id)
       .single()
 
     if (!business) return
     setBusinessId(business.id)
+    setSubscriptionStatus(business.subscription_status)
     setBusinessName(business.name ?? '')
     setOwnerName(business.owner_name ?? '')
     setRadius(business.checkin_radius_metres ?? 150)
@@ -290,6 +292,20 @@ export default function SettingsPage() {
             {locationSaving ? 'Saving…' : 'Save location'}
           </button>
         </div>
+      </div>
+
+      {/* Billing */}
+      <div className="bg-white border border-gray-200 rounded-2xl p-6">
+        <h2 className="text-base font-semibold text-gray-900 mb-2">Billing</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          Current plan: <span className="font-semibold text-gray-900 capitalize">{subscriptionStatus ?? 'inactive'}</span>
+        </p>
+        
+          href="/dashboard/upgrade"
+          className="px-5 py-2.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold rounded-xl transition-colors inline-block"
+        <a>
+          {subscriptionStatus === 'active' ? 'Manage billing' : 'Upgrade plan'}
+        </a>
       </div>
 
       {/* Sign out */}
