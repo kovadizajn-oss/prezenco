@@ -55,6 +55,15 @@ const navItems = [
       </svg>
     ),
   },
+  {
+    label: 'Upgrade',
+    href: '/dashboard/upgrade',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3l14 0M5 3l4 18M5 3l6 6 6-6M19 3l-4 18" />
+      </svg>
+    ),
+  },
 ]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
