@@ -124,7 +124,7 @@ export default function UpgradePage() {
                 {plan.employees}
               </p>
               <button
-                onClick={() => { if (!isCurrent) { isActive ? handlePortal() : handleSubscribe(plan.priceId!, plan.name) } }}                disabled={loading === plan.name || isCurrent}
+                onClick={() => { if (!isCurrent) { isActive ? handlePortal() : handleSubscribe(plan.priceId!, plan.name) } }}                disabled={loading === plan.name || isCurrent || planLoading}
                 className={`mt-auto w-full py-3 rounded-lg font-semibold transition-colors ${
                   isCurrent
                     ? 'bg-white/20 text-white cursor-default'
