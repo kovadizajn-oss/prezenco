@@ -374,7 +374,8 @@ export default function CheckinPage() {
           position: 'relative',
           overflow: 'hidden',
           border: 'none',
-          transition: 'background 0.3s',
+          transition: 'background 0.3s, box-shadow 0.3s',
+boxShadow: isCheckedIn ? '0 8px 32px rgba(239,68,68,0.45), 0 2px 8px rgba(239,68,68,0.3)' : '0 8px 32px rgba(34,197,94,0.45), 0 2px 8px rgba(34,197,94,0.3)',
         }}
       >
         {actionLoading ? (
