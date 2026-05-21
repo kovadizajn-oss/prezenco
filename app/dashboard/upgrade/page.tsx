@@ -130,7 +130,7 @@ export default function UpgradePage() {
                     : 'bg-gray-900 text-white hover:bg-gray-800'
                 } disabled:opacity-60`}
               >
-                {isCurrent || isPopular ? 'Active' : loading === plan.name ? 'Loading...' : isActive ? 'Switch to this plan' : 'Get started'}
+                {isCurrent ? 'Active' : loading === plan.name ? 'Loading...' : isActive ? 'Switch to this plan' : 'Get started'}
               </button>
             </div>
           )
