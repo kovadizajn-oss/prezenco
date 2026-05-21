@@ -131,6 +131,28 @@ setPlanName(business.plan_name)
 
   const handleDeactivate = async (id: string) => {
     await supabase.from('employees').update({ status: 'inactive' }).eq('id', id)
+
+    const { data: logs } = await supabase
+      .from('time_logs')
+      .select('id, type')
+      .eq('employee_id', id)
+      .order('timestamp', { ascending: false })
+      .limit(1)
+
+    if (logs?.[0]?.type === 'checkin') {
+      await supabase.from('time_logs').insert({
+        employee_id: id,
+        business_id: businessId,
+        type: 'checkout',
+        lat: 0,
+        lng: 0,
+        within_radius: false,
+        manually_adjusted: true,
+        adjusted_by: 'System',
+        adjustment_reason: 'Employee deactivated by owner',
+      })
+    }
+
     loadEmployees()
   }
 
