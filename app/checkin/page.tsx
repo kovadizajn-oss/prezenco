@@ -346,36 +346,18 @@ export default function CheckinPage() {
 
       {/* Big check in/out button */}
       {/* Hourglass check in/out button */}
-      {/* Hourglass check in/out button */}
       <style>{`
         @keyframes grain {
-          0%   { top: 80px; opacity: 1; }
-          90%  { opacity: 1; }
-          100% { top: 104px; opacity: 0; }
+          0%   { transform: translateY(0); opacity: 1; }
+          85%  { opacity: 1; }
+          100% { transform: translateY(8px); opacity: 0; }
         }
-        @keyframes grain2 {
-          0%   { top: 80px; opacity: 1; }
-          90%  { opacity: 1; }
-          100% { top: 104px; opacity: 0; }
+        .grain-dot {
+          animation: grain 1.2s linear infinite;
         }
-        .grain {
-          position: absolute;
-          left: 50%;
-          margin-left: -1.5px;
-          width: 3px;
-          height: 3px;
-          border-radius: 50%;
-          background: rgba(255,255,255,0.95);
-          animation: grain 1.1s linear infinite;
-          z-index: 2;
-          pointer-events: none;
-        }
-        .grain2 .grain2 { animation-delay: 1.1s; animation-name: grain2; }
-        .hg-svg {
-          transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .hg-svg.flipped {
-          transform: rotate(180deg);
+        .grain-dot2 {
+          animation: grain 1.2s linear infinite;
+          animation-delay: 0.6s;
         }
       `}</style>
 
@@ -406,21 +388,19 @@ export default function CheckinPage() {
           </div>
         ) : (
           <>
-            {isCheckedIn && (
-              <>
-                <div className="grain" />
-                <div className="grain grain2" />
-              </>
-            )}
-            {isCheckedIn ? (
-              <svg className="hg-svg" width="72" height="72" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="72" height="72" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {isCheckedIn ? (
                 <path d="M15 18H9M14 6H10M20 3H19M19 3H5M19 3C19 5.51022 17.7877 7.86592 15.7451 9.32495L12 12M5 3H4M5 3C5 5.51022 6.21228 7.86592 8.25493 9.32495L12 12M20 21H19M19 21H5M19 21C19 18.4898 17.7877 16.1341 15.7451 14.675L12 12M5 21H4M5 21C5 18.4898 6.21228 16.1341 8.25493 14.675L12 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            ) : (
-              <svg className="hg-svg" width="72" height="72" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              ) : (
                 <path d="M15 18H9M20 3H19M19 3H5M19 3C19 5.51022 17.7877 7.86592 15.7451 9.32495L12 12M5 3H4M5 3C5 5.51022 6.21228 7.86592 8.25493 9.32495L12 12M20 21H19M19 21H5M19 21C19 18.4898 17.7877 16.1341 15.7451 14.675L12 12M5 21H4M5 21C5 18.4898 6.21228 16.1341 8.25493 14.675L12 12" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            )}
+              )}
+              {isCheckedIn && (
+                <>
+                  <circle className="grain-dot" cx="12" cy="12.5" r="0.6" fill="white"/>
+                  <circle className="grain-dot2" cx="12" cy="12.5" r="0.6" fill="white"/>
+                </>
+              )}
+            </svg>
             <span style={{
               fontSize: 11,
               fontWeight: 700,
