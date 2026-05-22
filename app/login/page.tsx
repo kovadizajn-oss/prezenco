@@ -7,7 +7,7 @@ export default function LoginPage() {
         <div className="flex flex-col items-center gap-8">
           {/* Logo */}
           <div className="flex flex-col items-center gap-2">
-            <a href="/" style={{ fontFamily: 'var(--font-geist-sans)' }} className="text-xl font-extrabold text-primary hover:opacity-80 transition-opacity"
+            <a href="/" style={{ fontFamily: 'var(--font-geist-sans)' }} className="text-3xl font-bold tracking-tight text-primary"
             >
               Zummo
             </a>

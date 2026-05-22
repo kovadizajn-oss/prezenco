@@ -71,10 +71,8 @@ export default function SignupStep3Page() {
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
       <div className="mb-8 text-center">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-green-500 mb-3">
-          <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+      <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-green-500 mb-3 overflow-hidden">
+          <img src="/logo-white.png" alt="Zummo" className="w-8 h-8 object-contain" />
         </div>
         <h1 className="text-2xl font-bold text-gray-900">Zummo</h1>
         <p className="text-gray-500 text-sm mt-1">Employee time tracking</p>
