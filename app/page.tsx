@@ -14,6 +14,7 @@ export default function LandingPage() {
                   <img src="/logo.png" alt="Zummo" className="w-6 h-6 object-contain" />
                 </div>
                 <span className="text-white font-bold text-xl tracking-tight">Zummo</span>
+
               </Link>
               <Link href="/login" className="text-white font-medium hover:text-white/80 transition-colors">
                 Log in / Sign up
