@@ -10,16 +10,8 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
             <div className="flex items-center justify-between h-20">
               <Link href="/" className="flex items-center gap-2.5">
-                <div className="w-8 h-8 bg-white rounded-md flex items-center justify-center">
-                  <svg width="18" height="22" viewBox="0 0 52 64" fill="none">
-                    <rect x="4" y="2" width="44" height="6" rx="3" fill="#22c55e"/>
-                    <rect x="4" y="56" width="44" height="6" rx="3" fill="#22c55e"/>
-                    <line x1="8" y1="8" x2="26" y2="32" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round"/>
-                    <line x1="44" y1="8" x2="26" y2="32" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round"/>
-                    <line x1="8" y1="56" x2="26" y2="32" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round"/>
-                    <line x1="44" y1="56" x2="26" y2="32" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round"/>
-                    <polygon points="26,34 9,57 43,57" fill="#22c55e" opacity="0.7"/>
-                  </svg>
+              <div className="w-8 h-8 bg-white rounded-md flex items-center justify-center overflow-hidden">
+                  <img src="/logo.png" alt="Zummo" className="w-6 h-6 object-contain" />
                 </div>
                 <span className="text-white font-bold text-xl tracking-tight">ZUMMO</span>
               </Link>
