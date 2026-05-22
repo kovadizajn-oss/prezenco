@@ -150,17 +150,9 @@ href={plan.price === 'Custom' ? 'mailto:contact@zummo.com' : '/login'}          
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-[#22c55e] rounded-md flex items-center justify-center">
-                <svg width="12" height="15" viewBox="0 0 52 64" fill="none">
-                  <rect x="4" y="2" width="44" height="6" rx="3" fill="white"/>
-                  <rect x="4" y="56" width="44" height="6" rx="3" fill="white"/>
-                  <line x1="8" y1="8" x2="26" y2="32" stroke="white" strokeWidth="3" strokeLinecap="round"/>
-                  <line x1="44" y1="8" x2="26" y2="32" stroke="white" strokeWidth="3" strokeLinecap="round"/>
-                  <line x1="8" y1="56" x2="26" y2="32" stroke="white" strokeWidth="3" strokeLinecap="round"/>
-                  <line x1="44" y1="56" x2="26" y2="32" stroke="white" strokeWidth="3" strokeLinecap="round"/>
-                  <polygon points="26,34 9,57 43,57" fill="white" opacity="0.7"/>
-                </svg>
-              </div>
+            <div className="w-6 h-6 bg-[#22c55e] rounded-md flex items-center justify-center overflow-hidden">
+                  <img src="/logo-white.png" alt="Zummo" className="w-4 h-4 object-contain" />
+                </div>
               <span className="font-bold text-zinc-900">Zummo</span>
             </div>
             <nav className="flex items-center gap-8">
