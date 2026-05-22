@@ -7,9 +7,9 @@ export default function LoginPage() {
         <div className="flex flex-col items-center gap-8">
           {/* Logo */}
           <div className="flex flex-col items-center gap-2">
-            <h1 className="text-3xl font-bold tracking-tight text-primary">
+            <a href="/" style={{ fontFamily: 'Newake' }} className="text-3xl font-bold tracking-tight text-primary hover:opacity-80 transition-opacity">
               Zummo
-            </h1>
+            </a>
           </div>
 
           {/* Login Card */}
