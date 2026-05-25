@@ -13,6 +13,24 @@ export default function ResetPasswordPage() {
   const [validSession, setValidSession] = useState(false)
 
   useEffect(() => {
+    const hash = window.location.hash
+    if (hash) {
+      const params = new URLSearchParams(hash.replace('#', ''))
+      const accessToken = params.get('access_token')
+      const refreshToken = params.get('refresh_token')
+      const type = params.get('type')
+
+      if (accessToken && type === 'recovery') {
+        supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken ?? '',
+        }).then(({ error }) => {
+          if (!error) setValidSession(true)
+        })
+        return
+      }
+    }
+
     supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {
         setValidSession(true)
