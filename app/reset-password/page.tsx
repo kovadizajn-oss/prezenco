@@ -17,16 +17,24 @@ export default function ResetPasswordPage() {
     if (hash) {
       const params = new URLSearchParams(hash.replace('#', ''))
       const accessToken = params.get('access_token')
-      const refreshToken = params.get('refresh_token')
       const type = params.get('type')
 
-      if (accessToken && type === 'recovery') {
-        supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken ?? '',
-        }).then(({ error }) => {
-          if (!error) setValidSession(true)
-        })
+      if (type === 'recovery') {
+        if (accessToken && accessToken.length > 20) {
+          supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: params.get('refresh_token') ?? '',
+          }).then(({ error }) => {
+            if (!error) setValidSession(true)
+          })
+        } else if (accessToken) {
+          supabase.auth.verifyOtp({
+            token_hash: accessToken,
+            type: 'recovery',
+          }).then(({ error }) => {
+            if (!error) setValidSession(true)
+          })
+        }
         return
       }
     }
