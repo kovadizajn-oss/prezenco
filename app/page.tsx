@@ -1,8 +1,11 @@
 import Link from 'next/link'
+import AuthRedirect from './components/AuthRedirect'
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white"><AuthRedirect />
+      
+      
 
       {/* HERO */}
       <section className="relative bg-[#22c55e] overflow-hidden">
